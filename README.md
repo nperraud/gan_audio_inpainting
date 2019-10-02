@@ -39,6 +39,13 @@ Please keep this repository as clean as possible and do not commit data nor note
 	jupyter lab
 	```
 
+6. Check the folder notebooks. Do the work.
+
+7. Clean your notebook using the makefile from the `notebooks` folder. This will erease all your outputs of all your notebook. If you do not want this, clean your notebook manually.
+	```
+	cd notebooks
+	make clean
+	```
 
 
 ## Project general informations
