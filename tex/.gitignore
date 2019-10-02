@@ -1,0 +1,17 @@
+*.ipynb_checkpoints/
+.DS_STORE
+*~
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.idx
+*.ilg
+*.ind
+*.toc
+*.aux
+*.log
+*.out
+*.spl
+*.synctex.gz
+*-eps-converted-to.pdf

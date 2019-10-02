@@ -1,0 +1,75 @@
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{blindtext}
+\usepackage{cite}
+
+\title{Audio inpainting with Generative Adversarial Networks}
+
+\date{Student project - fall 2019}
+
+\begin{document}
+
+
+\maketitle
+
+\section{Abstract}
+Despite impressive recent advances with neural networks \cite{van2016wavenet,donahue2018wavegan}, audio synthesis remain an important challenge in machine learning. The main problem is that even small inconsistencies in the audio waveform often implies background noise or artifacts. 
+For that reason, audio inpainting algorithms attempting an exact recovery of the waveform are limited to length up to 30ms.
+For greater length, it is useless to try recovering the exact waveform. Fortunately, Generative Adversarial Networks (GANs) are able to produce signals statistically similar without the need to minimize an L2 loss. Hence they are a very good candidate for the audio inpaiting with large gaps problem.
+
+
+
+\section{Details of the project}
+In this project, the student will be asked to create a GAN for audio inpainting. First he will create a dataset for the task. Then he will implement a conditional GAN to perform audio inpainting.
+The architecture will be based on WaveGAN \cite{donahue2018wavegan}, TiFGAN \cite{marafioti2019adversarial} or wavenet \cite{van2016wavenet}.
+If the results are convincing, we may try to organize a perceptual test in collaboration with the Acoustic Research Institute of Vienna and we may write a small paper.
+
+% \clearpage
+% \newpage
+
+\section{Student tasks}
+\paragraph{Stage 1: framework preparation} 
+\begin{itemize}
+	\item Produce a dataset
+	\item Run a few baselines (for comparison)
+\end{itemize}
+
+\paragraph{Stage 2: GAN implementation}
+\begin{itemize}
+	\item Implement the GAN in TensorFlow or Pytorch
+	\item Test different sound representation (WaveGAN, TiFGAN)
+	\item Train the GAN
+\end{itemize}
+
+\paragraph{Stage 3: Pycho-acoustic test (optional)}
+\begin{itemize}
+	\item Prepare a pyscho-acoustic experiment
+	\item 
+\end{itemize}
+
+\paragraph{Stage 4: Report)}
+\begin{itemize}
+	\item Write a report of the experiment
+	\item (Optional) Transform the report in a 4-page conference paper
+\end{itemize}
+
+\section{Additional information}
+\paragraph{What will you learn?}  Deep learning, GANs, TensorFlow or Pytorch, Time Frequency analysis, Audio synthesis, numerical analysis,
+\paragraph{Requirements:} Machine Learning fundamentals, linear algebra, good python level, experience with git 
+\paragraph{Supervisor:} Nathanaël Perraudin, nathanael.perraudin@sdsc.ethz.ch
+\paragraph{Is a publication possible?} Yes if the project goes well.
+
+
+\clearpage
+\newpage
+
+\bibliographystyle{plain}
+\bibliography{biblio}{}
+
+
+
+\end{document}
+
+
