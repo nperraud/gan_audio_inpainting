@@ -1,0 +1,14 @@
+numpy==1.16
+tensorflow-gpu==1.13.2
+pillow
+h5py
+sklearn
+scikit-image
+pyyaml
+-e gantools
+-e gantools/tfnntools
+matplotlib
+jupyterlab
+moviepy
+requests
+wavio

@@ -4,6 +4,43 @@ This is the repository for the DAS project `Audio inpainting with Generative Adv
 
 Please keep this repository as clean as possible and do not commit data nor notebook with excecuted cells.
 
+## How to use the code in this projects
+
+1. Go the folder code 
+
+	```
+	cd code
+	```
+
+2. Initializae submodules
+
+	```
+	git submodule update --init --recursive
+	```
+
+3. Install package (make a virtual environnement first)
+
+	```
+	pip install -r requirements.txt
+	```
+
+	You may want to use the nogpu version of the packages (`requirements_nogpu.txt`) for you local computer.
+
+4. Download datasets (just made it work for one)
+	
+	```
+	python download_data.py
+	python make_piano_dataset.py
+	```
+
+5. Launch jupyter
+	
+	```
+	jupyter lab
+	```
+
+
+
 ## Project general informations
 
 * Meeting time: Thursday 2pm
