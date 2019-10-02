@@ -89,10 +89,13 @@ Mostly you need to be aware of
 
 
 ## Data sources
+- [Bach piano performances](http://deepyeti.ucsd.edu/cdonahue/wavegan/data/mancini_piano.tar.gz)
+- [The Free Music Archive](https://github.com/mdeff/fma)
+- ... 
 
+These datasets are probably not going to work because the audio snipets are too short... To check
 - [Speech Commands Zero through Nine (SC09)](http://deepyeti.ucsd.edu/cdonahue/wavegan/data/sc09.tar.gz)
 - [Drum sound effects](http://deepyeti.ucsd.edu/cdonahue/wavegan/data/drums.tar.gz)
-- [Bach piano performances](http://deepyeti.ucsd.edu/cdonahue/wavegan/data/mancini_piano.tar.gz)
 - [Nsynth dataset](https://magenta.tensorflow.org/datasets/nsynth)
 
 
