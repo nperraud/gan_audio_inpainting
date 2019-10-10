@@ -105,3 +105,17 @@ These datasets are probably not going to work because the audio snipets are too 
 * Notebook to start working: <https://github.com/nperraud/CodeGAN/blob/audio-inpainting/audio_experiment/GAN-audio-inpainting.ipynb>
 * Main git used as a submodule for gan <https://github.com/nperraud/gantools/>
 
+
+## Executing code at CSCS
+
+Some help to execute code on CSCS
+
+* [Global setup and access to CSCS](https://gist.github.com/nperraud/a52351fd23e6dbe275325b1bf413787c)
+* [Python code execution](https://gist.github.com/nperraud/24f4a9d8275db63bf9d623b156cb0363)
+* Checking for the list of jobs: `squeue -u $USER -l`
+* Storage on CSCS
+	- 10 Gb (max 10'000 files) in home
+	- `$SCRATCH` Unlimited space and files but autodelete after 30 days of not being used
+
+
+
