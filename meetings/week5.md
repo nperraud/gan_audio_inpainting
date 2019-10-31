@@ -2,24 +2,24 @@
 
 ## Amr: this week tasks
 
-- Check the `Dataset` class is in `gantools/data/core.py`
+Part A: Solo Dataset
+    - Check the `Dataset` class is in `gantools/data/core.py`
+    - Understand what is the sampling frequency, downsampling data
+    - Make the dataset
+        * Retrain the model with the new data from the `solo` dataset
 
-- Make the dataset
-    * Retrain the model with the new data from the `solo` dataset
+Part B: Improve the global architecture
 
-- Understand what is the sampling frequency, downsampling data
+  * Steps:
+    1. Draw current architecture
+    2. Draw modification
+    3. Check with Nathanaël if ok
+    4. Understand the model code
+    5. Code the new architecture in a new file...
 
-- Improve the global architecture
   * Understand the file `code/gantools/gantools/model.py` (class InpaintingGAN)
   * Make a new class similar to InpaintingGAN
     * with the context block
-  * Steps:
-    1. Understand the model code
-    2. Draw current architecture
-    3. Draw modification
-    4. Check with Nathanaël if ok
-    5. Code   
-
 
 ## Pirmin: this week tasks
 
