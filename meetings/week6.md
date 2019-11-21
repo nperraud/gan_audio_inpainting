@@ -1,6 +1,35 @@
-# Week 5: 23 october 2019
+# Week 6: 21 November 2019
+
+## Pirmin: this week tasks
+
+- Advice:
+```
+def gen_data(files):
+'''Return one data point that goes into the network'''
+  for file in files:
+    dat = load(file)
+    datp = preprocess(dat) # augmentation and slicing
+    for d in datp:
+      yield d
+def grouper(gen, batchsize):
+  ...
+def queued_generator(...)
+  ...
+
+gen_slow = gen_data(files)
+gen_bs = grouper(gen_slow, batch_size)
+gen_fast_bs = queued_geneartor(gen_bs)
+```
+- Have a trained network
+  * assess the performance...
 
 ## Amr: this week tasks
+  - Run the code with the Solo Dataset
+  - Try to implement the double discriminator model.
+    * Go step by step
+
+
+## Amr: last week tasks
 
 Part A: Solo Dataset
     - Check the `Dataset` class is in `gantools/data/core.py`
@@ -21,7 +50,7 @@ Part B: Improve the global architecture
   * Make a new class similar to InpaintingGAN
     * with the context block
 
-## Pirmin: this week tasks
+## Pirmin: last week tasks
 
 - Build a generator for the large dataset... (all the pipeline including some function to download the files)
 
