@@ -5,9 +5,9 @@
 import sys
 sys.path.insert(0, '../')
 
-# No GPU because working locally
+
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+#os.environ["CUDA_VISIBLE_DEVICES"]=""  # No GPU because working locally
 
 import time
 import numpy as np
