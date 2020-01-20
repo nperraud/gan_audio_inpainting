@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --time=23:59:00
-#SBATCH --nodes=1
+#SBATCH --nodes=2
 #SBATCH --ntasks=1
 #SBATCH --constraint=gpu
 #SBATCH --output=myexperiment-o-%j.log
@@ -14,4 +14,4 @@ module load TensorFlow/1.14.0-CrayGNU-19.10-cuda-10.1.168-python3
 source $HOME/default/bin/activate
 
 cd $HOME/gan_audio_inpainting/code/experiments
-srun python myexperiments.py
+srun python myexperiments-solo4.py
