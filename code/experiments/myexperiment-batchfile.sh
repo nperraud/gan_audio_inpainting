@@ -9,7 +9,7 @@
 
 module load daint-gpu
 module load cray-python
-module load TensorFlow/1.12.0-CrayGNU-18.08-cuda-9.1-python3
+module load TensorFlow/1.14.0-CrayGNU-19.10-cuda-10.1.168-python3
 
 source $HOME/default/bin/activate
 
