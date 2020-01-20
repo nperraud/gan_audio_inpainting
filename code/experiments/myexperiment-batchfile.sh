@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --time=23:59:00
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --constraint=gpu
 #SBATCH --output=myexperiment-o-%j.log
