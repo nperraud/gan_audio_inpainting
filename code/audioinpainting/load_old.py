@@ -11,9 +11,9 @@ from functools import partial
 def do_nothing(x):
     return x
 
-def load_solo_rawdata():
-    pathdata = os.path.join(data_root_path(), 'guitar/guitar-train.npz')
-    return np.load(pathdata)['arr_0']
+# def load_nysnth_rawdata():
+#     pathdata = os.path.join(path.nsynth_path(), 'nsynth-valid.npz')
+#     return np.load(pathdata)['arr_0']
 
 def load_piano_rawdata():
     pathdata = os.path.join(data_root_path(), 'piano/piano-train.npz')
@@ -21,7 +21,7 @@ def load_piano_rawdata():
 
 
 def load_audio_dataset(
-        shuffle=True, scaling=1, patch=False, augmentation=False, spix=None, smooth=None, type='solo'):
+        shuffle=True, scaling=1, patch=False, augmentation=False, spix=None, smooth=None, type='nsynth'):
     ''' Load a Nsynth dataset object.
 
      Arguments
@@ -32,9 +32,9 @@ def load_audio_dataset(
     * scaling : downscale the image by a factor (default 1)
     '''
 
-    if type == 'solo':
-        sig = load_solo_rawdata()
-        #sig = sig[:, :2**15]
+    if type == 'nsynth':
+        sig = load_nysnth_rawdata()
+        sig = sig[:, :2**15]
     elif type == 'piano':
         sig = load_piano_rawdata()
     else:

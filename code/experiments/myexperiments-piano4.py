@@ -31,7 +31,7 @@ downscale = 2
 # Load the data 
 start = time.time()
 # dataset = data.load.load_audio_dataset(scaling=downscale)
-dataset = load_audio_dataset(scaling=downscale, type='solo', spix=1024*52, augmentation=True)
+dataset = load_audio_dataset(scaling=downscale, type='piano', spix=1024*52, augmentation=True)
 
 print('Number of samples: {}'.format(dataset.N))
 
@@ -140,7 +140,7 @@ params['net']['shape'] = [signal_length, 1] # Shape of the image
 params['net']['inpainting'] = dict()
 params['net']['inpainting']['split'] = signal_split
 params['net']['gamma_gp'] = 10 # Gradient penalty
-params['net']['fs'] = 14700//downscale
+params['net']['fs'] = 16000//downscale
 params['net']['loss_type'] ='wasserstein'
 
 params['optimization'] = params_optimization
