@@ -64,9 +64,9 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 
-time_str = 'solo_inpaint'
+time_str = 'piano_inpaint'
 #global_path = '../saved_results'
-global_path = '/scratch/snx3000/aeltelt/saved_results'
+global_path = '/scratch/snx3000/aeltelt/saved_results_piano'
 
 name = 'WGAN' + '_' + time_str
 

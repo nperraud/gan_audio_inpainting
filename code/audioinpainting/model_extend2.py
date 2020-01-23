@@ -381,8 +381,8 @@ class InpaintingGAN(WGAN):
 
     def batch2dict(self, batch):
         d = dict()
-        d['X_real'] = self.assert_image(batch[:len(batch)//2])
-        d['X_to_inpaint'] = self.assert_image(batch[len(batch)//2:])
+        d['X_real'] = self.assert_image(batch[:len(batch)//1])
+        d['X_to_inpaint'] = self.assert_image(batch[len(batch)//1:])
         d['z'] = self.sample_latent(len(batch))
         return d
 
