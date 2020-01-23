@@ -387,7 +387,7 @@ class InpaintingGAN(WGAN):
         return d
 
     def sample_latent(self, bs=1):
-        return super().sample_latent(int(bs//2))
+        return super().sample_latent(int(bs//1))
 	
     def _build_generator(self):
         self.z = tf.placeholder(
