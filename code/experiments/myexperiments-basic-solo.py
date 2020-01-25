@@ -7,19 +7,21 @@ sys.path.insert(0, '../')
 
 # No GPU because working locally
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+#os.environ["CUDA_VISIBLE_DEVICES"]=""
 
+import time
 import numpy as np
 import tensorflow as tf
 from gantools import utils
 from gantools import plot
-from gantools.model_extend import InpaintingGAN
+#from gantools.model_extend import InpaintingGAN
 from gantools.gansystem import GANsystem
 
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from gantools import blocks
-from audioinpainting.load_solo import load_audio_dataset
+from audioinpainting.load import load_audio_dataset
+from audioinpainting.model_basic import InpaintingGAN
 
 # # Parameters
 
@@ -27,7 +29,7 @@ downscale = 2
 
 # # Data handling
 # Load the data 
-
+start = time.time()
 # dataset = data.load.load_audio_dataset(scaling=downscale)
 dataset = load_audio_dataset(scaling=downscale, type='solo', spix=1024*16, augmentation=True)
 
@@ -62,8 +64,9 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 
-time_str = 'solo_inpaint'
-global_path = '../saved_results'
+time_str = 'basic_solo'
+#global_path = '../saved_results'
+global_path = '/scratch/snx3000/aeltelt/saved_results'
 
 name = 'WGAN' + '_' + time_str
 
@@ -71,8 +74,8 @@ name = 'WGAN' + '_' + time_str
 # ## Parameters
 
 bn = False
-signal_length = 1024*52
-signal_split = [1024*18, 1024*6, 1024*4, 1024*6, 1024*18]
+signal_length = 1024*16
+signal_split = [1024*6, 1024*4, 1024*6]
 md = 64
 
 params_discriminator = dict()
@@ -146,10 +149,10 @@ params['print_every'] = 50 # Console summaries every ** iterations
 params['save_every'] = 1000 # Save the model every ** iterations
 params['summary_dir'] = os.path.join(global_path, name +'_summary/')
 params['save_dir'] = os.path.join(global_path, name + '_checkpoints/')
-params['Nstats'] = 100
+params['Nstats'] = 0
 
 
-resume, params = utils.test_resume(True, params)
+resume, params = utils.test_resume(False, params)
 
 #%%
 # # Build the model
@@ -159,6 +162,9 @@ wgan = GANsystem(InpaintingGAN, params)
 # # Train the model
 
 wgan.train(dataset, resume=resume)
+
+end = time.time()
+print('Elapse time: {} minutes'.format((end - start)/60))
 
 # =============================================================================
 # #%%

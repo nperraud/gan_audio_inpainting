@@ -7,8 +7,9 @@ sys.path.insert(0, '../')
 
 # No GPU because working locally
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+#os.environ["CUDA_VISIBLE_DEVICES"]=""
 
+import time
 import numpy as np
 import tensorflow as tf
 from gantools import utils
@@ -19,8 +20,8 @@ from gantools.gansystem import GANsystem
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from gantools import blocks
-from audioinpainting.load_solo import load_audio_dataset
-from audioinpainting.model_extend02 import InpaintingGAN
+from audioinpainting.load import load_audio_dataset
+from audioinpainting.model_extend import InpaintingGAN
 
 # # Parameters
 
@@ -28,9 +29,9 @@ downscale = 2
 
 # # Data handling
 # Load the data 
-
+start = time.time()
 # dataset = data.load.load_audio_dataset(scaling=downscale)
-dataset = load_audio_dataset(scaling=downscale, type='solo', spix=1024*52, augmentation=True)
+dataset = load_audio_dataset(scaling=downscale, type='piano', spix=1024*52, augmentation=True)
 
 print('Number of samples: {}'.format(dataset.N))
 
@@ -63,8 +64,9 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 
-time_str = 'solo_inpaint'
-global_path = '../saved_results'
+time_str = 'extend_piano'
+#global_path = '../saved_results'
+global_path = '/scratch/snx3000/aeltelt/saved_results'
 
 name = 'WGAN' + '_' + time_str
 
@@ -115,8 +117,8 @@ params_generator['borders']['activation'] = tf.nn.relu
 
 
 params_optimization = dict()
-params_optimization['batch_size'] = 32
-params_optimization['epoch'] = 3 #10000
+params_optimization['batch_size'] = 64
+params_optimization['epoch'] = 10000
 params_optimization['n_critic'] = 5
 params_optimization['generator'] = dict()
 params_optimization['generator']['optimizer'] = 'adam'
@@ -138,7 +140,7 @@ params['net']['shape'] = [signal_length, 1] # Shape of the image
 params['net']['inpainting'] = dict()
 params['net']['inpainting']['split'] = signal_split
 params['net']['gamma_gp'] = 10 # Gradient penalty
-params['net']['fs'] = 14700//downscale
+params['net']['fs'] = 16000//downscale
 params['net']['loss_type'] ='wasserstein'
 
 params['optimization'] = params_optimization
@@ -160,6 +162,9 @@ wgan = GANsystem(InpaintingGAN, params)
 # # Train the model
 
 wgan.train(dataset, resume=resume)
+
+end = time.time()
+print('Elapse time: {} minutes'.format((end - start)/60))
 
 # =============================================================================
 # #%%

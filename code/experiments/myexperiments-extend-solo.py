@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 from gantools import blocks
 from audioinpainting.load import load_audio_dataset
-from audioinpainting.model_extend2 import InpaintingGAN
+from audioinpainting.model_extend import InpaintingGAN
 
 # # Parameters
 
@@ -64,9 +64,9 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 
-time_str = 'solo_inpaint'
+time_str = 'extend_solo'
 #global_path = '../saved_results'
-global_path = '/scratch/snx3000/aeltelt/saved_results_solo'
+global_path = '/scratch/snx3000/aeltelt/saved_results'
 
 name = 'WGAN' + '_' + time_str
 
@@ -117,7 +117,7 @@ params_generator['borders']['activation'] = tf.nn.relu
 
 
 params_optimization = dict()
-params_optimization['batch_size'] = 32
+params_optimization['batch_size'] = 64
 params_optimization['epoch'] = 10000
 params_optimization['n_critic'] = 5
 params_optimization['generator'] = dict()

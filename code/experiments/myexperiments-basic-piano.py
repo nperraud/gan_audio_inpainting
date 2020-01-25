@@ -7,29 +7,31 @@ sys.path.insert(0, '../')
 
 # No GPU because working locally
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+#os.environ["CUDA_VISIBLE_DEVICES"]=""
 
+import time
 import numpy as np
 import tensorflow as tf
 from gantools import utils
 from gantools import plot
-from gantools.model import InpaintingGAN
+#from gantools.model_extend import InpaintingGAN
 from gantools.gansystem import GANsystem
 
 import matplotlib.pyplot as plt
 from copy import deepcopy
 from gantools import blocks
-from audioinpainting.load_solo import load_audio_dataset
+from audioinpainting.load import load_audio_dataset
+from audioinpainting.model_basic import InpaintingGAN
 
 # # Parameters
 
 downscale = 2
 
 # # Data handling
-# Load the data
-
+# Load the data 
+start = time.time()
 # dataset = data.load.load_audio_dataset(scaling=downscale)
-dataset = load_audio_dataset(scaling=downscale, type='solo', spix=1024*16, augmentation=True)
+dataset = load_audio_dataset(scaling=downscale, type='piano', spix=1024*16, augmentation=True)
 
 print('Number of samples: {}'.format(dataset.N))
 
@@ -56,14 +58,15 @@ print('Number of samples: {}'.format(dataset.N))
 # plot.audio.plot_signals(dataset.get_samples(N=16),nx=4,ny=4);
 # plt.suptitle("Real samples");
 # 
-# plot.audio.play_sound(dataset.get_samples(16)[0,:], fs=16000//downscale)
+# plot.audio.play_sound(dataset.get_samples(16)[0,:], fs=14700//downscale)
 # =============================================================================
 
 #%%
 # # Define parameters for the WGAN
 
-time_str = 'solo_inpaint'
-global_path = '../saved_results'
+time_str = 'basic_piano'
+#global_path = '../saved_results'
+global_path = '/scratch/snx3000/aeltelt/saved_results'
 
 name = 'WGAN' + '_' + time_str
 
@@ -146,10 +149,10 @@ params['print_every'] = 50 # Console summaries every ** iterations
 params['save_every'] = 1000 # Save the model every ** iterations
 params['summary_dir'] = os.path.join(global_path, name +'_summary/')
 params['save_dir'] = os.path.join(global_path, name + '_checkpoints/')
-params['Nstats'] = 100
+params['Nstats'] = 0
 
 
-resume, params = utils.test_resume(True, params)
+resume, params = utils.test_resume(False, params)
 
 #%%
 # # Build the model
@@ -159,6 +162,9 @@ wgan = GANsystem(InpaintingGAN, params)
 # # Train the model
 
 wgan.train(dataset, resume=resume)
+
+end = time.time()
+print('Elapse time: {} minutes'.format((end - start)/60))
 
 # =============================================================================
 # #%%
@@ -187,9 +193,9 @@ wgan.train(dataset, resume=resume)
 # 
 # for i in range(4):
 #     print('Real')
-#     plot.audio.play_sound(real_signals[i,:], fs=16000//downscale)    
+#     plot.audio.play_sound(real_signals[i,:], fs=14700//downscale)    
 #     print('Fake')
-#     plot.audio.play_sound(fake_signals[i,:], fs=16000//downscale)
+#     plot.audio.play_sound(fake_signals[i,:], fs=14700//downscale)
 # 
 # plot.audio.plot_signals(fake_signals,nx=4,ny=4);
 # plt.suptitle("Fake samples");
@@ -200,10 +206,10 @@ wgan.train(dataset, resume=resume)
 # for i in range(4):
 #     plt.figure(figsize=(15, 4))
 #     plt.subplot(121)
-#     plot_sgram(fake_signals[i].astype(np.float64), fs=16000//downscale);
+#     plot_sgram(fake_signals[i].astype(np.float64), fs=14700//downscale);
 #     plt.title('Inpainted')
 #     plt.subplot(122)
-#     plot_sgram(real_signals[i].astype(np.float64), fs=16000//downscale);
+#     plot_sgram(real_signals[i].astype(np.float64), fs=14700//downscale);
 #     plt.title('Original')
 # =============================================================================
 

@@ -379,15 +379,19 @@ class InpaintingGAN(WGAN):
         self._inputs = (self.z, self.borders1, self.borders2)
         self._outputs = (self.X_fake1, self.X_fake2)
 
-    def batch2dict(self, batch):
-        d = dict()
-        d['X_real'] = self.assert_image(batch[:len(batch)//2])
-        d['X_to_inpaint'] = self.assert_image(batch[len(batch)//2:])
-        d['z'] = self.sample_latent(len(batch))
-        return d
-
-    def sample_latent(self, bs=1):
-        return super().sample_latent(int(bs//2))
+# =============================================================================
+#     def batch2dict(self, batch):
+#         d = dict()
+#         d['X_real'] = self.assert_image(batch[:len(batch)//2])
+#         d['X_to_inpaint'] = self.assert_image(batch[len(batch)//2:])
+#         #d['X_real'] = self.assert_image(batch)
+#         #d['X_to_inpaint'] = self.assert_image(batch)
+#         d['z'] = self.sample_latent(len(batch))
+#         return d
+# 
+#     def sample_latent(self, bs=1):
+#         return super().sample_latent(int(bs//2))
+# =============================================================================
 	
     def _build_generator(self):
         self.z = tf.placeholder(
@@ -399,20 +403,15 @@ class InpaintingGAN(WGAN):
         r1, r2, self.real_center, r3, r4 = tf.split(self.X_real, self.params['inpainting']['split'], axis=1)
         self.X_real1 = tf.concat([r2, self.real_center, r3], axis=self.data_size)
         self.X_real2 = self.X_real
-        
-        self.X_to_inpaint = tf.placeholder(tf.float32, shape=[None, *shape], name='XtoInpaint')
-        l1, l2, self.inpaint_center, l3, l4 = tf.split(self.X_to_inpaint, self.params['inpainting']['split'], axis=1)
-        b1 = tf.concat([l1,l2], axis=self.data_size)
-        b2 = l2
-        b3 = l3
-        b4 = tf.concat([l3,l4], axis=self.data_size)
-        
+
+        b1 = tf.concat([r1,r2], axis=self.data_size)
+        b2 = r2
+        b3 = r3
+        b4 = tf.concat([r3,r4], axis=self.data_size)
         borders1 = tf.concat([b2,b3], axis=self.data_size+1)
         inshape1 = borders1.shape.as_list()[1:]
-        self.borders1 = tf.placeholder_with_default(borders1, shape=[None, *inshape1], name='borders')
-        
+        self.borders1 = tf.placeholder_with_default(borders1, shape=[None, *inshape1], name='borders')  
         borders2 = tf.concat([b1,b4], axis=self.data_size+1)
-
         inshape2 = borders2.shape.as_list()[1:]
         self.borders2 = tf.placeholder_with_default(borders2, shape=[None, *inshape2], name='borders')
         borders2_down1 = down_sampler(self.borders2[:,:,0:1], 4, 1)
@@ -431,10 +430,10 @@ class InpaintingGAN(WGAN):
             self.X_fake2 = tf.concat([self.borders2[:,:,:,0:1], self.X_fake_center, self.borders2[:,:,:,1:2]], axis=1)
         else:
             raise NotImplementedError()
+        self.X_fake = self.X_fake2
 
+        
     def _build_discriminator(self, X_fake, X_real, scope):
-        #self.X_fake = X_fake
-        #self.X_real = X_real
         D_fake = self.discriminator(X_fake, reuse=False, scope=scope)
         D_real = self.discriminator(X_real, reuse=True, scope=scope)
         D_loss_f = tf.reduce_mean(D_fake)
@@ -476,22 +475,160 @@ class InpaintingGAN(WGAN):
             self._params['generator']['in_conv_shape'] = in_conv_shape
   
         self._build_generator()
-        self._D_loss1, self._G_loss1,  D_loss_f1, D_loss_r1 = self._build_discriminator(self.X_fake1, self.X_real1, scope="discriminator1")
+        self._D_loss1, self._G_loss1, self._D_loss_f1, self._D_loss_r1 = self._build_discriminator(self.X_fake1, self.X_real1, scope="discriminator1")
+
         self.X_fake2_down = down_sampler(self.X_fake2, 4, 1)
         self.X_real2_down = down_sampler(self.X_real2, 4, 1)
-        self._D_loss2, self._G_loss2,  D_loss_f2, D_loss_r2 = self._build_discriminator(self.X_fake2_down, self.X_real2_down, scope="discriminator2")
+        self._D_loss2, self._G_loss2, self._D_loss_f2, self._D_loss_r2 = self._build_discriminator(self.X_fake2_down, self.X_real2_down, scope="discriminator2")
         
         self._D_loss = self._D_loss1 + self._D_loss2
         self._G_loss = self._G_loss1 + self._G_loss2
         
-        self._D_loss_f = tf.reduce_mean(D_loss_f1) +  tf.reduce_mean(D_loss_f2)
-        self._D_loss_r = tf.reduce_mean(D_loss_r1) + tf.reduce_mean(D_loss_r2)    
+        self._D_loss_f = tf.reduce_mean(self._D_loss_f1) +  tf.reduce_mean(self._D_loss_f2)
+        self._D_loss_r = tf.reduce_mean(self._D_loss_r1) + tf.reduce_mean(self._D_loss_r2)    
 
     def generator(self, z, y1, y2, **kwargs):
         return generator_border(z, y1=y1, y2=y2, params=self.params['generator'], **kwargs)
 
     def discriminator(self, X, **kwargs):
         return discriminator(X, params=self.params['discriminator'], **kwargs) 
+
+    def _wgan_summaries(self):
+        tf.summary.scalar("Disc/Neg_Loss", -self._D_loss, collections=["train"])
+        tf.summary.scalar("Disc/Neg_Critic", self._D_loss_f - self._D_loss_r, collections=["train"])
+        tf.summary.scalar("Disc/Loss_f", self._D_loss_f, collections=["train"])
+        tf.summary.scalar("Disc/Loss_r", self._D_loss_r, collections=["train"])
+        tf.summary.scalar("Gen/Loss", self._G_loss, collections=["train"])
+        
+        tf.summary.scalar("Disc/Neg_Loss1", -self._D_loss1, collections=["train"])
+        tf.summary.scalar("Disc/Neg_Critic1", self._D_loss_f1 - self._D_loss_r1, collections=["train"])
+        tf.summary.scalar("Disc/Loss_f1", self._D_loss_f1, collections=["train"])
+        tf.summary.scalar("Disc/Loss_r1", self._D_loss_r1, collections=["train"])
+        tf.summary.scalar("Gen/Loss1", self._G_loss1, collections=["train"])
+
+        tf.summary.scalar("Disc/Neg_Loss2", -self._D_loss1, collections=["train"])
+        tf.summary.scalar("Disc/Neg_Critic2", self._D_loss_f1 - self._D_loss_r1, collections=["train"])
+        tf.summary.scalar("Disc/Loss_f2", self._D_loss_f1, collections=["train"])
+        tf.summary.scalar("Disc/Loss_r2", self._D_loss_r1, collections=["train"])
+        tf.summary.scalar("Gen/Loss2", self._G_loss1, collections=["train"])
+
+    def _build_image_summary(self):
+        vmin1 = tf.reduce_min(self.X_real1)
+        vmax1 = tf.reduce_max(self.X_real1)
+        vmin2 = tf.reduce_min(self.X_real2)
+        vmax2 = tf.reduce_max(self.X_real2)
+        if self.data_size==3:
+            X_real1 = utils.tf_cube_sl1ices(self.X_real1)
+            X_fake1 = utils.tf_cube_slices(self.X_fake1)
+            # Plot some slices
+            sl = self.X_real1.shape[3]//2
+            tf.summary.image(
+                "images/Real1_Image_slice_middle",
+                colorize(self.X_real1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake1_Image_slice_middle",
+                colorize(self.X_fake1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            sl = self.X_real1.shape[3]-1
+            tf.summary.image(
+                "images/Real1_Image_slice_end",
+                colorize(self.X_real1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake1_Image_slice_end",
+                colorize(self.X_fake1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            sl = (self.X_real1.shape[3]*3)//4
+            tf.summary.image(
+                "images/Real1_Image_slice_3/4",
+                colorize(self.X_real1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake1_Image_slice_3/4",
+                colorize(self.X_fake1[:,:,:,sl,:], vmin1, vmax1),
+                max_outputs=4,
+                collections=['model'])
+            X_real2 = utils.tf_cube_slices(self.X_real2)
+            X_fake2 = utils.tf_cube_slices(self.X_fake2)
+            # Plot some slices
+            sl = self.X_real2.shape[3]//2
+            tf.summary.image(
+                "images/Real2_Image_slice_middle",
+                colorize(self.X_real2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake2_Image_slice_middle",
+                colorize(self.X_fake2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+            sl = self.X_real2.shape[3]-1
+            tf.summary.image(
+                "images/Real2_Image_slice_end",
+                colorize(self.X_real2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake2_Image_slice_end",
+                colorize(self.X_fake2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+            sl = (self.X_real2.shape[3]*3)//4
+            tf.summary.image(
+                "images/Real2_Image_slice_3/4",
+                colorize(self.X_real2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+            tf.summary.image(
+                "images/Fake2_Image_slice_3/4",
+                colorize(self.X_fake2[:,:,:,sl,:], vmin2, vmax2),
+                max_outputs=4,
+                collections=['model'])
+        elif self.data_size==2:
+            X_real1 = self.X_real1
+            X_fake1 = self.X_fake1
+            X_real2 = self.X_real2
+            X_fake2 = self.X_fake2
+        elif self.data_size==1:
+            self._plot_real = PlotSummaryPlot(4, 4, "real", "signals", collections=['model'])
+            self._plot_fake = PlotSummaryPlot(4, 4, "fake", "signals", collections=['model'])
+            fs = self.params.get('fs', 14700)
+            tf.summary.audio(
+                'audio/Real1', self.X_real1, fs, max_outputs=4, collections=['model'])
+            tf.summary.audio(
+                'audio/Fake1', self.X_fake1, fs, max_outputs=4, collections=['model'])
+            tf.summary.audio(
+                'audio/Real2', self.X_real2, fs, max_outputs=4, collections=['model'])
+            tf.summary.audio(
+                'audio/Fake2', self.X_fake2, fs, max_outputs=4, collections=['model'])
+            return None
+        tf.summary.image(
+            "images/Real1_Image",
+            colorize(X_real1, vmin1, vmax1),
+            max_outputs=4,
+            collections=['model'])
+        tf.summary.image(
+            "images/Fake1_Image",
+            colorize(X_fake1, vmin1, vmax1),
+            max_outputs=4,
+            collections=['model'])
+        tf.summary.image(
+            "images/Real2_Image",
+            colorize(X_real2, vmin2, vmax2),
+            max_outputs=4,
+            collections=['model'])
+        tf.summary.image(
+            "images/Fake2_Image",
+            colorize(X_fake2, vmin2, vmax2),
+            max_outputs=4,
+            collections=['model'])
+
 
 def wgan_summaries(D_loss, G_loss, D_loss_f, D_loss_r):
     tf.summary.scalar("Disc/Neg_Loss", -D_loss, collections=["Training"])
