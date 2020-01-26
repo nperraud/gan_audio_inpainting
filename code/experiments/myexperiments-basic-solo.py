@@ -66,7 +66,7 @@ print('Number of samples: {}'.format(dataset.N))
 
 time_str = 'basic_solo'
 #global_path = '../saved_results'
-global_path = '/scratch/snx3000/aeltelt/saved_results'
+global_path = '/scratch/snx3000/aeltelt/saved_results_basic'
 
 name = 'WGAN' + '_' + time_str
 
