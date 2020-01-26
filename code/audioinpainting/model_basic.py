@@ -380,15 +380,6 @@ class InpaintingGAN(WGAN):
         self._inputs = (self.z, self.borders)
         self._outputs = (self.X_fake)
 
-    def batch2dict(self, batch):
-        d = dict()
-        d['X_real'] = self.assert_image(batch[:len(batch)//2])
-        d['X_to_inpaint'] = self.assert_image(batch[len(batch)//2:])
-        d['z'] = self.sample_latent(len(batch))
-        return d
-
-    def sample_latent(self, bs=1):
-        return super().sample_latent(int(bs//2))
 	
     def _build_generator(self):
         shape = self._params['shape']
@@ -398,8 +389,7 @@ class InpaintingGAN(WGAN):
             shape=[None, self.params['generator']['latent_dim']],
             name='z')
 
-        self.X_to_inpaint = tf.placeholder(tf.float32, shape=[None, *shape], name='XtoInpaint')
-        borderleft, self.center_real, borderright = tf.split(self.X_to_inpaint, self.params['inpainting']['split'], axis=1)
+        borderleft, self.center_real, borderright = tf.split(self.X_real, self.params['inpainting']['split'], axis=1)
         borders = tf.concat([borderleft,borderright], axis=self.data_size+1)
         inshape = borders.shape.as_list()[1:]
 

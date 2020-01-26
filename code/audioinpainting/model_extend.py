@@ -379,19 +379,6 @@ class InpaintingGAN(WGAN):
         self._inputs = (self.z, self.borders1, self.borders2)
         self._outputs = (self.X_fake1, self.X_fake2)
 
-# =============================================================================
-#     def batch2dict(self, batch):
-#         d = dict()
-#         d['X_real'] = self.assert_image(batch[:len(batch)//2])
-#         d['X_to_inpaint'] = self.assert_image(batch[len(batch)//2:])
-#         #d['X_real'] = self.assert_image(batch)
-#         #d['X_to_inpaint'] = self.assert_image(batch)
-#         d['z'] = self.sample_latent(len(batch))
-#         return d
-# 
-#     def sample_latent(self, bs=1):
-#         return super().sample_latent(int(bs//2))
-# =============================================================================
 	
     def _build_generator(self):
         self.z = tf.placeholder(
