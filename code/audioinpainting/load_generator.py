@@ -7,6 +7,7 @@
 # coding: utf-8
 
 import multiprocessing
+#from .path import data_root_path
 import os
 import time
 import numpy as np
@@ -17,64 +18,69 @@ from gantools.utils import compose2
 from functools import partial
 import pandas as pd
 import itertools
-
-data_root_path = '/scratch/snx3000/pebner/gan_audio_inpainting/data'
+import random
 
 def do_nothing(x):
     return x
 
 
-def get_data(scaling=1, smooth=None, phase='train'):
+def get_data(scaling=1, smooth=None, phase='train', types='maestro', dpath='../../data', fs_rate=44100, batch_nr=15, preprocessing=False):
 
-    def load_maestro_paths(phase='train'):
-        pathdata = os.path.join(data_root_path, 'maestro-v2.0.0')
+    def load_maestro_paths(phase='train', dpath='../../data'):
+        pathdata = os.path.join(dpath, 'maestro-v2.0.0')
         pathdata_csv = os.path.join(pathdata, 'maestro-v2.0.0.csv')
         wave_paths = pd.read_csv(pathdata_csv, delimiter=',')
         wave_paths = sorted([os.path.join(pathdata, path) for idx, path in enumerate(wave_paths['audio_filename']) if
                       wave_paths['split'][idx] == phase])
         return wave_paths
 
-    def load_piano_paths():
-        wave_paths = [f for f in os.listdir('../../data/piano/train') if f.endswith('.wav')]
-        wave_paths = sorted([os.path.join('../../data/piano/train',f) for f in wave_paths])
+    def load_piano_paths(phase='train', dpath='../../data'):
+        pathdata = os.path.join(dpath, phase)
+        wave_paths = [f for f in os.listdir(pathdata) if f.endswith('.wav')]
+        wave_paths = sorted([os.path.join(pathdata,f) for f in wave_paths])
         return wave_paths
 
-    def normalize(x):
-        m = np.max(np.abs(x))
-        return x / m
+    def load_solo_paths():
+        pathdata = os.path.join('../../data/solo/', 'guitar-train.npz')
+        return np.load(pathdata)['arr_0']
 
-    def tomono(x):
-        return (x[:, 0] + x[:, 1]) / 2
+    def load_data(wave_path):
+        def normalize(x):
+            m = np.max(np.abs(x))
+            return x / m
 
-    def downsample3(sig, Nwin=32):
-        win = firwin(numtaps=Nwin, cutoff=0.55)
-        new_sig = sig.copy()
-        new_sig = np.convolve(new_sig, win, 'same')
-        new_sig = new_sig[2::3]
-        return new_sig
+        def tomono(x):
+            return (x[:, 0] + x[:, 1]) / 2
 
-    def toint16(x):
-        return np.int16(x * (2 ** 15))
+        def downsample3(sig, Nwin=32):
+            win = firwin(numtaps=Nwin, cutoff=0.55)
+            new_sig = sig.copy()
+            new_sig = np.convolve(new_sig, win, 'same')
+            new_sig = new_sig[2::3]
+            return new_sig
 
-    def transform(x):
-        x = x/(2**15)
-        x = (0.99*x.T/np.max(np.abs(x), axis=1)).T
-        return x
+        def toint16(x):
+            return np.int16(x * (2 ** 15))
 
-    # Load path to wave files
-
-    wave_paths = load_maestro_paths(phase)
-    #wave_paths = load_piano_paths()
-
-    for wave_path in wave_paths:
+        # Load data
         wavobj = read(wave_path)
         fs = wavobj.rate
-        assert (fs == 44100)
+        # Preprocess data
         waveform = wavobj.data.copy()
         waveform = normalize(waveform)
         waveform = tomono(waveform)
         waveform = downsample3(waveform)
-        sig = toint16(waveform)
+        waveform = toint16(waveform)
+        if len(waveform.shape) == 1:
+            waveform = np.reshape(waveform, [1, len(waveform)])
+        return waveform, fs
+
+
+    def preprocess(sig):
+        def transform(x):
+            x = x/(2**15)
+            x = (0.99*x.T/np.max(np.abs(x), axis=1)).T
+            return x
 
         if len(sig.shape) == 1:
             sig = np.reshape(sig, [1, len(sig)])
@@ -92,11 +98,62 @@ def get_data(scaling=1, smooth=None, phase='train'):
             sig = sig[:, :(sig.shape[1] // smooth) * smooth]
             sig_down = transformation.downsample_1d(sig, smooth, Nwin=Nwin)
             sig_smooth = transformation.upsamler_1d(sig_down, smooth, Nwin=Nwin)
-
             sig = np.concatenate((np.expand_dims(sig, axis=2), np.expand_dims(sig_smooth, axis=2)), axis=2)
-        print('Get data {}'.format(wave_path))
-        time.sleep(0.5)
-        yield sig
+        return sig
+
+
+    # Load path to wave files
+    if types == 'maestro':
+        wave_paths = load_maestro_paths(phase, dpath)
+        random.shuffle(wave_paths)
+        wave_paths.append('Done')
+    elif types == 'piano':
+        wave_paths = load_piano_paths(phase, dpath)
+        wave_paths.append('Done')
+    elif types == 'solo':
+        wave_paths = load_solo_paths()
+        wave_paths.append('Done')
+    else:
+        raise ValueError('Incorrect value for types')
+    # Initialize array for appending
+    if batch_nr:
+        signal = np.array([], dtype=np.int16)
+        signal = np.reshape(signal, [1, len(signal)])
+        nr = 0
+
+    # Start loop over wave files
+    for wave_path in wave_paths:
+        if wave_path is not 'Done':
+            sig, fs = load_data(wave_path)
+            if fs != fs_rate:
+                continue
+
+            if batch_nr:
+                if preprocessing:
+                    sig = preprocess(sig)
+                signal = np.concatenate((signal, sig), axis=1)
+                nr += 1
+                if nr == batch_nr:
+                    if not preprocessing:
+                        sig = preprocess(signal)
+                    else:
+                        sig = signal
+                    nr = 0
+                    signal = np.array([], dtype=np.int16)
+                    signal = np.reshape(signal, [1, len(signal)])
+                    yield sig
+            else:
+                sig = preprocess(sig)
+                yield sig
+        elif wave_path is 'Done' and batch_nr:
+            if not preprocessing and signal.shape[1] > 0:
+                yield preprocess(signal)
+            elif signal.shape[1] > 0:
+                yield signal
+
+
+
+
 
 
 def queued_generator(data, maxsize=2):
@@ -131,7 +188,8 @@ class Dataset_maestro(object):
         Transform should probably be False for a classical GAN.
     '''
 
-    def __init__(self, phase='train', scaling=1, smooth=None, shuffle=True, patch=False, spix=None, augmentation=False, maxsize=2, dtype=np.float32):
+    def __init__(self, phase='train', scaling=1, smooth=None, shuffle=True, patch=False, spix=None, augmentation=False, maxsize=2,
+                 types='maestro', dpath='../../data', fs_rate=44100, batch_nr=15, preprocessing=None, dtype=np.float32):
         ''' Initialize a Dataset object
 
         Arguments
@@ -143,17 +201,21 @@ class Dataset_maestro(object):
         * slice_fn : Slicing function to cut the data into smaller parts
         '''
         self.dtype = dtype
+        self.dpath = dpath
+        self.types = types
+        self.fs_rate = fs_rate
         self.scaling = scaling
         self.smooth = smooth
         self.phase = phase
         self.maxsize = maxsize
+        self.batch_nr = batch_nr
+        self.preprocessing = preprocessing
 
-        self.my_generator = queued_generator(get_data(self.scaling, self.smooth, self.phase), maxsize=self.maxsize)
-        self._X = next(self.my_generator).astype(self.dtype)
-        self.X = self._X
+        self.my_generator = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, types=self.types, dpath=self.dpath, fs_rate=self.fs_rate, batch_nr=self.batch_nr, preprocessing=self.preprocessing), maxsize=self.maxsize)
+        X = next(self.my_generator).astype(self.dtype)
+
         self._shuffle = shuffle
         if patch:
-
             self._slice_fn = partial(transformation.slice_1d_patch, spix=spix)
         else:
             if spix is not None:
@@ -167,12 +229,15 @@ class Dataset_maestro(object):
             self._transform = do_nothing
 
         self._data_process = compose2(self._transform, self._slice_fn)
-        self._N = len(self._data_process(self._X))
+        self._N = len(self._data_process(X))
         self.n = self._N
         if shuffle:
             self._p = np.random.permutation(self._N)
         else:
             self._p = np.arange(self._N)
+
+        self._X = X
+
 
     def get_all_data(self):
         ''' Return all the data (shuffled) '''
@@ -188,23 +253,26 @@ class Dataset_maestro(object):
 
     # TODO: kwargs to be removed
     def __iter__(self, batch_size=1, **kwargs):
-        self.my_gen = queued_generator(get_data(self.scaling, self.smooth, self.phase), maxsize=self.maxsize)
+        self.my_gen = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, types=self.types, dpath=self.dpath, fs_rate=self.fs_rate, batch_nr=self.batch_nr, preprocessing=self.preprocessing), maxsize=self.maxsize)
+
         for data_gen in self.my_gen:
 
+            # Loading new wave file'
             self._X = data_gen.astype(self.dtype)
             self._N = len(self._data_process(self._X))
-            self._p = np.arange(self._N)
 
             # Batch size greater than total number of samples available -> concatenate data
-            while batch_size > self.N:
-
+            while batch_size > self._N:
+                print('Concatenate data because batch_size {} > self.N {}'. format(batch_size, self._N))
                 self._X = np.concatenate((self._X, next(self.my_gen).astype(self.dtype)), axis=1)
                 self._N = len(self._data_process(self._X))
-                self._p = np.arange(self._N)
 
             # Reshuffle the data
-            if self.shuffle:
+            if self._shuffle:
                 self._p = np.random.permutation(self._N)
+            else:
+                self._p = np.arange(self._N)
+
             nel = (self._N // batch_size) * batch_size
             transformed_data = self._data_process(self._X)[self._p[range(nel)]]
             for data in grouper(transformed_data, batch_size):
