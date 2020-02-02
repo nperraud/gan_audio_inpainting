@@ -24,18 +24,18 @@ def do_nothing(x):
     return x
 
 
-def get_data(scaling=1, smooth=None, phase='train', types='maestro', dpath='../../data', fs_rate=44100, batch_nr=15, preprocessing=False):
+def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../data', fs_rate=44100, files=15, preprocessing=False):
 
-    def load_maestro_paths(phase='train', dpath='../../data'):
-        pathdata = os.path.join(dpath, 'maestro-v2.0.0')
+    def load_maestro_paths(phase='train', path='../../data'):
+        pathdata = os.path.join(path, 'maestro-v2.0.0')
         pathdata_csv = os.path.join(pathdata, 'maestro-v2.0.0.csv')
         wave_paths = pd.read_csv(pathdata_csv, delimiter=',')
         wave_paths = sorted([os.path.join(pathdata, path) for idx, path in enumerate(wave_paths['audio_filename']) if
                       wave_paths['split'][idx] == phase])
         return wave_paths
 
-    def load_piano_paths(phase='train', dpath='../../data'):
-        pathdata = os.path.join(dpath, phase)
+    def load_piano_paths(phase='train', path='../../data'):
+        pathdata = os.path.join(path, phase)
         wave_paths = [f for f in os.listdir(pathdata) if f.endswith('.wav')]
         wave_paths = sorted([os.path.join(pathdata,f) for f in wave_paths])
         return wave_paths
@@ -103,20 +103,20 @@ def get_data(scaling=1, smooth=None, phase='train', types='maestro', dpath='../.
 
 
     # Load path to wave files
-    if types == 'maestro':
-        wave_paths = load_maestro_paths(phase, dpath)
+    if type == 'maestro':
+        wave_paths = load_maestro_paths(phase, path)
         random.shuffle(wave_paths)
         wave_paths.append('Done')
-    elif types == 'piano':
-        wave_paths = load_piano_paths(phase, dpath)
+    elif type == 'piano':
+        wave_paths = load_piano_paths(phase, path)
         wave_paths.append('Done')
-    elif types == 'solo':
+    elif type == 'solo':
         wave_paths = load_solo_paths()
         wave_paths.append('Done')
     else:
-        raise ValueError('Incorrect value for types')
+        raise ValueError('Incorrect value for type')
     # Initialize array for appending
-    if batch_nr:
+    if files:
         signal = np.array([], dtype=np.int16)
         signal = np.reshape(signal, [1, len(signal)])
         nr = 0
@@ -128,12 +128,12 @@ def get_data(scaling=1, smooth=None, phase='train', types='maestro', dpath='../.
             if fs != fs_rate:
                 continue
 
-            if batch_nr:
+            if files:
                 if preprocessing:
                     sig = preprocess(sig)
                 signal = np.concatenate((signal, sig), axis=1)
                 nr += 1
-                if nr == batch_nr:
+                if nr == files:
                     if not preprocessing:
                         sig = preprocess(signal)
                     else:
@@ -145,7 +145,7 @@ def get_data(scaling=1, smooth=None, phase='train', types='maestro', dpath='../.
             else:
                 sig = preprocess(sig)
                 yield sig
-        elif wave_path is 'Done' and batch_nr:
+        elif wave_path is 'Done' and files:
             if not preprocessing and signal.shape[1] > 0:
                 yield preprocess(signal)
             elif signal.shape[1] > 0:
@@ -189,7 +189,7 @@ class Dataset_maestro(object):
     '''
 
     def __init__(self, phase='train', scaling=1, smooth=None, shuffle=True, patch=False, spix=None, augmentation=False, maxsize=2,
-                 types='maestro', dpath='../../data', fs_rate=44100, batch_nr=15, preprocessing=None, dtype=np.float32):
+                 type='maestro', path='../../data', fs_rate=44100, files=15, preprocessing=None, dtype=np.float32):
         ''' Initialize a Dataset object
 
         Arguments
@@ -201,17 +201,17 @@ class Dataset_maestro(object):
         * slice_fn : Slicing function to cut the data into smaller parts
         '''
         self.dtype = dtype
-        self.dpath = dpath
-        self.types = types
+        self.path = path
+        self.type = type
         self.fs_rate = fs_rate
         self.scaling = scaling
         self.smooth = smooth
         self.phase = phase
         self.maxsize = maxsize
-        self.batch_nr = batch_nr
+        self.files = files
         self.preprocessing = preprocessing
 
-        self.my_generator = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, types=self.types, dpath=self.dpath, fs_rate=self.fs_rate, batch_nr=self.batch_nr, preprocessing=self.preprocessing), maxsize=self.maxsize)
+        self.my_generator = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, type=self.type, path=self.path, fs_rate=self.fs_rate, files=self.files, preprocessing=self.preprocessing), maxsize=self.maxsize)
         X = next(self.my_generator).astype(self.dtype)
 
         self._shuffle = shuffle
@@ -253,7 +253,7 @@ class Dataset_maestro(object):
 
     # TODO: kwargs to be removed
     def __iter__(self, batch_size=1, **kwargs):
-        self.my_gen = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, types=self.types, dpath=self.dpath, fs_rate=self.fs_rate, batch_nr=self.batch_nr, preprocessing=self.preprocessing), maxsize=self.maxsize)
+        self.my_gen = queued_generator(get_data(scaling=self.scaling, smooth=self.smooth, phase=self.phase, type=self.type, path=self.path, fs_rate=self.fs_rate, files=self.files, preprocessing=self.preprocessing), maxsize=self.maxsize)
 
         for data_gen in self.my_gen:
 
