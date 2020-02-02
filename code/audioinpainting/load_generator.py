@@ -40,9 +40,11 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
         wave_paths = sorted([os.path.join(pathdata,f) for f in wave_paths])
         return wave_paths
 
-    def load_solo_paths():
-        pathdata = os.path.join('../../data/solo/', 'guitar-train.npz')
-        return np.load(pathdata)['arr_0']
+    def load_solo_paths(phase='train', path='../../data'):
+        pathdata = os.path.join(path, phase)
+        wave_paths = [f for f in os.listdir(pathdata) if f.endswith('.wav')]
+        wave_paths = sorted([os.path.join(pathdata,f) for f in wave_paths])
+        return wave_paths
 
     def load_data(wave_path):
         def normalize(x):
@@ -75,7 +77,6 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
             waveform = np.reshape(waveform, [1, len(waveform)])
         return waveform, fs
 
-
     def preprocess(sig):
         def transform(x):
             x = x/(2**15)
@@ -87,20 +88,18 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
 
         # Transform data
         sig = transform(sig)
-
         # Downsample
         Nwin = 32
         if scaling > 1:
             # sig = blocks.downsample(sig, scaling)
             sig = transformation.downsample_1d(sig, scaling, Nwin=Nwin)
-
+        # Smoothing
         if smooth is not None:
             sig = sig[:, :(sig.shape[1] // smooth) * smooth]
             sig_down = transformation.downsample_1d(sig, smooth, Nwin=Nwin)
             sig_smooth = transformation.upsamler_1d(sig_down, smooth, Nwin=Nwin)
             sig = np.concatenate((np.expand_dims(sig, axis=2), np.expand_dims(sig_smooth, axis=2)), axis=2)
         return sig
-
 
     # Load path to wave files
     if type == 'maestro':
@@ -109,9 +108,11 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
         wave_paths.append('Done')
     elif type == 'piano':
         wave_paths = load_piano_paths(phase, path)
+        random.shuffle(wave_paths)
         wave_paths.append('Done')
     elif type == 'solo':
-        wave_paths = load_solo_paths()
+        wave_paths = load_solo_paths(phase, path)
+        random.shuffle(wave_paths)
         wave_paths.append('Done')
     else:
         raise ValueError('Incorrect value for type')
@@ -150,10 +151,6 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
                 yield preprocess(signal)
             elif signal.shape[1] > 0:
                 yield signal
-
-
-
-
 
 
 def queued_generator(data, maxsize=2):
