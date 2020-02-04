@@ -23,14 +23,18 @@ from audioinpainting.load_generator import Dataset_maestro
 import ltfatpy
 from ltfatpy import plotdgtreal
 
-# # Parameters
+## Trained model
 downscale = 2
 model = 'extend'
-type = 'piano'
+type = 'solo'
+
+## Used dataset
 phase = 'test'
 path = '../../data/piano'   # Path to the dataset
+data = 'piano' # Dataset to test model
+fs_rate = 48000 # 44100
 
-# # Define parameters for the WGAN
+## Define parameters for the WGAN
 time_str = '{}_{}'.format(model, type)
 global_path = '../../../saved_results'
 name = 'WGAN' + '_' + time_str
@@ -55,7 +59,7 @@ elif model =='basic':
 else:
     raise ValueError('Incorrect model; choose either "extend" or "basic"')
 
-dataset = Dataset_maestro(scaling=downscale, spix=spix, augmentation=True, maxsize=2, phase=phase, type=type, path=path, fs_rate=48000, files=8, preprocessing=False)
+dataset = Dataset_maestro(scaling=downscale, spix=spix, augmentation=True, maxsize=2, phase=phase, type=data, path=path, fs_rate=fs_rate, files=8, preprocessing=False)
 # Check whether number of generated samples is consistent with total number of samples
 if N_f > dataset.N:
     N_f = dataset.N
@@ -150,13 +154,19 @@ wgan = GANsystem(InpaintingGAN, params)
 # Generate new samples
 print('Generate new samples')
 real_signals = dataset.get_samples(N=N_f)
-border1 = real_signals[:,signal_split[0]:(signal_split[0]+signal_split[1])]
-border2 = real_signals[:,-(signal_split[3]+signal_split[4]):-signal_split[4]]
-border3 = real_signals[:,:(signal_split[0]+signal_split[1])]
-border4 = real_signals[:,-(signal_split[3]+signal_split[4]):]
-borders1 = np.stack([border1, border2], axis=2)
-borders2 = np.stack([border3, border4], axis=2)
-fake_signals = np.squeeze(wgan.generate(N=N_f, borders1=borders1, borders2=borders2)[1], axis=2)
+if model == 'extend':
+    border1 = real_signals[:,signal_split[0]:(signal_split[0]+signal_split[1])]
+    border2 = real_signals[:,-(signal_split[3]+signal_split[4]):-signal_split[4]]
+    border3 = real_signals[:,:(signal_split[0]+signal_split[1])]
+    border4 = real_signals[:,-(signal_split[3]+signal_split[4]):]
+    borders1 = np.stack([border1, border2], axis=2)
+    borders2 = np.stack([border3, border4], axis=2)
+    fake_signals = np.squeeze(wgan.generate(N=N_f, borders1=borders1, borders2=borders2)[1], axis=2)
+elif model == 'basic':
+    border1 = real_signals[:, :signal_split[0]]
+    border2 = real_signals[:,-signal_split[2]:]
+    borders = np.stack([border1, border2], axis=2)
+    fake_signals = np.squeeze(wgan.generate(N=N_f, borders=borders))
 
 
 # Calculating Signal to Noise Ratio (SNR)
@@ -189,7 +199,7 @@ def save_sound(x, fs, filename):
 
 # Calculating Signal to Noise Ratio (SNR)
 print('Calculate SNRs')
-path_snr = os.path.join(path,'results/snr/')
+path_snr = os.path.join(path,'results_{}_{}/snr/'.format(model, type))
 if not os.path.exists(path_snr):
     os.makedirs(path_snr)
 SNRs = _pavlovs_SNR(real_signals, fake_signals)
@@ -198,7 +208,7 @@ SNRs.to_csv('{}/SNRs.csv'.format(path_snr), index=True)
 
 # Save sound file
 print('Save sound files')
-path_wav = os.path.join(path,'results/wav/')
+path_wav = os.path.join(path,'results_{}_{}/wav/'.format(model, type))
 if not os.path.exists(path_wav):
     os.makedirs(path_wav)
 for i in range(N_f):
@@ -210,7 +220,7 @@ for i in range(N_f):
 
 # Display a few fake samples
 print('Display a few real and fake samples')
-path_fig = os.path.join(path,'results/fig/')
+path_fig = os.path.join(path,'results_{}_{}/fig/'.format(model, type))
 if not os.path.exists(path_fig):
     os.makedirs(path_fig)
 plot.audio.plot_signals(real_signals,nx=4,ny=4);
@@ -223,7 +233,7 @@ plt.savefig('{}/fake.png'.format(path_fig))
 
 # Display magnitude spectrogram
 print('Display a few real and fake magnitude spectrogram')
-path_sgram = os.path.join(path,'results/sgram/')
+path_sgram = os.path.join(path,'results_{}_{}/sgram/'.format(model, type))
 if not os.path.exists(path_sgram):
     os.makedirs(path_sgram)
 for i in range(N_f):

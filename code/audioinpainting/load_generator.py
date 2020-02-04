@@ -66,11 +66,15 @@ def get_data(scaling=1, smooth=None, phase='train', type='maestro', path='../../
 
         # Load data
         wavobj = read(wave_path)
+
         fs = wavobj.rate
         # Preprocess data
         waveform = wavobj.data.copy()
         waveform = normalize(waveform)
-        waveform = tomono(waveform)
+        if type == 'solo':
+            waveform = waveform[:, 0]
+        else:
+            waveform = tomono(waveform)
         waveform = downsample3(waveform)
         waveform = toint16(waveform)
         if len(waveform.shape) == 1:
