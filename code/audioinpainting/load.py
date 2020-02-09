@@ -12,11 +12,11 @@ def do_nothing(x):
     return x
 
 def load_solo_rawdata():
-    pathdata = os.path.join(data_root_path(), 'guitar/guitar-train.npz')
+    pathdata = os.path.join(data_root_path(), 'guitar/guitar-test.npz')
     return np.load(pathdata)['arr_0']
 
 def load_piano_rawdata():
-    pathdata = os.path.join(data_root_path(), 'piano/piano-train.npz')
+    pathdata = os.path.join(data_root_path(), 'piano/piano-test.npz')
     return np.load(pathdata)['arr_0']
 
 

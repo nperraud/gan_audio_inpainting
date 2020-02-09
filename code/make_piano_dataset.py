@@ -26,7 +26,7 @@ def tomono(x):
 
 if __name__ == '__main__':
 
-    pathaudio = '../data/piano/train'
+    pathaudio = '../data/piano/test'
 
     files = os.listdir(pathaudio)
     paths = []
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
     waveforms = np.array([], dtype=np.int16)
     for i, filepath in enumerate(paths):
-        wavobj = read(paths[10])
+        wavobj = read(paths[i])
         fs = wavobj.rate
         assert(fs==48000)
         waveform = wavobj.data.copy()
@@ -46,4 +46,4 @@ if __name__ == '__main__':
         waveform = toint16(waveform)
         waveforms = np.append(waveforms, waveform, axis=0)
 
-    np.savez('../data/piano/piano-train',waveforms)
+    np.savez('../data/piano/piano-test',waveforms)
