@@ -30,13 +30,12 @@ model = 'extend'
 #model = 'basic'
 type = 'piano'
 #type = 'solo'
-phase = 'test'
 
-if type=='piano'
+if type=='piano':
     path = '../../data/piano'   # Path to the dataset
     fs = 16000//downscale
     global_path = '/scratch/snx3000/aeltelt/saved_results_basic'
-elif type=='solo'
+elif type=='solo':
     path = '../../data/solo'   # Path to the dataset
     fs = 14700//downscale
     global_path = '/scratch/snx3000/aeltelt/saved_results'
