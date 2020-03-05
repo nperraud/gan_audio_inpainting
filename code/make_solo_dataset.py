@@ -26,7 +26,7 @@ def tomono(x):
 
 if __name__ == '__main__':
 
-    pathaudio = '../data/guitar/train'
+    pathaudio = '../data/guitar/test'
 
     files = os.listdir(pathaudio)
     paths = []
@@ -46,4 +46,4 @@ if __name__ == '__main__':
         waveform = toint16(waveform)
         waveforms = np.append(waveforms, waveform, axis=0)
 
-    np.savez('../data/guitar/guitar-train',waveforms)
+    np.savez('../data/guitar/guitar-test',waveforms)
