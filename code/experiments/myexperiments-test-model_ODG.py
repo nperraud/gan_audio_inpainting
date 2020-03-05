@@ -27,13 +27,17 @@ downscale = 2
 models = ['extend', 'basic']
 types = ['solo', 'piano']
 
-for model in models:
-    for type in types:
+for type in types:
+    for model in models:
         if type=='solo':
-            path = '../../data/guitar'   # Path to the dataset
+            aa = 0
+            bb = 0
+            path = '../../data/samples/guitar'   # Path to the dataset
             fs = 14700//downscale
         elif type=='piano':
-            path = '../../data/piano'   # Path to the dataset
+            aa = 50
+            bb = -50
+            path = '../../data/samples/piano'   # Path to the dataset
             fs = 16000//downscale
         
         # # Define parameters for the WGAN
@@ -50,11 +54,13 @@ for model in models:
         print('Load the data for model {}'.format(model))
         if model=='extend':
             from audioinpainting.model_extend import InpaintingGAN
+            uu = 0 + aa
             spix = 1024*52
             signal_length = 1024 * 52
             signal_split = [1024 * 18, 1024 * 6, 1024 * 4, 1024 * 6, 1024 * 18]
         elif model =='basic':
             from audioinpainting.model_basic import InpaintingGAN
+            uu = 50 + bb
             spix = 1024*52
             signal_length = 1024 * 52
             signal_split = [1024 * 24, 1024 * 4, 1024 * 24]
@@ -186,27 +192,29 @@ for model in models:
         
         # Save sound file
         print('Save sound files')
-        path_wav = os.path.join(path,'results_{}_{}/wav/'.format(model, type))
-        if not os.path.exists(path_wav):
-            os.makedirs(path_wav)
+        #path_wav = os.path.join(path,'results_{}_{}/wav/'.format(model, type))
+        if not os.path.exists(path):
+            os.makedirs(path)
         for i in range(N_f):
             # Real
-            save_sound(real_signals[i,:], fs=fs, filename='{}/real_{}.wav'.format(path_wav, i))
+            #save_sound(real_signals[i,:], fs=fs, filename='{}/real_{}.wav'.format(path, i))
             # Fake
-            save_sound(fake_signals[i,:], fs=fs, filename='{}/fake_{}.wav'.format(path_wav, i))
+            save_sound(fake_signals[i,:], fs=fs, filename='{}/{}.wav'.format(path, i+uu))
         
         
-        # Display a few fake samples
-        print('Display a few real and fake samples')
-        path_fig = os.path.join(path,'results_{}_{}/fig/'.format(model, type))
-        if not os.path.exists(path_fig):
-            os.makedirs(path_fig)
-        plot.audio.plot_signals(real_signals,nx=4,ny=4);
-        plt.suptitle("Real samples")
-        plt.savefig('{}/real.png'.format(path_fig))
-        plot.audio.plot_signals(fake_signals,nx=4,ny=4);
-        plt.suptitle("Fake samples")
-        plt.savefig('{}/fake.png'.format(path_fig))
+# =============================================================================
+#         # Display a few fake samples
+#         print('Display a few real and fake samples')
+#         path_fig = os.path.join(path,'results_{}_{}/fig/'.format(model, type))
+#         if not os.path.exists(path_fig):
+#             os.makedirs(path_fig)
+#         plot.audio.plot_signals(real_signals,nx=4,ny=4);
+#         plt.suptitle("Real samples")
+#         plt.savefig('{}/real.png'.format(path_fig))
+#         plot.audio.plot_signals(fake_signals,nx=4,ny=4);
+#         plt.suptitle("Fake samples")
+#         plt.savefig('{}/fake.png'.format(path_fig))
+# =============================================================================
         
         
         # =============================================================================
