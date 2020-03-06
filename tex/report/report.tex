@@ -27,6 +27,10 @@ ebnerp@student.ethz.ch
 Amr Eltelt\\
 ETH Zurich\\
 aeltelt@student.ethz.ch
+\And
+Nathanaël Perraudin\\
+Swiss Data Science Center ETH\\
+nathanael.perraudin@gmail.com
 }
 
 
@@ -49,20 +53,20 @@ aeltelt@student.ethz.ch
 \maketitle
 
 \begin{abstract}
-We study the ability of Wasserstein Generative Adversarial Network (WGAN) to generate missing audio content which is in context (statistically similar) to the sound and the neighboring borders. We focus here on gaps in the range of 500 ms. To deal with the challenge of audio inpainting long range gaps, we propose a new WGAN architecture that uses a short-range and a long-range neighboring borders to improve the inpainting part. The performance was compared with the classical WGAN model on two different audio instruments (piano and guitar) and on virtuoso pianists together with a string orchestra. The objective difference grading (ODG) was used to evaluate the performance of both architectures. We showed that our new proposed model slightly outperforms the classical WGAN model and improves the reconstruction of high-frequency content. Further, better results can be expected for instruments where the frequency spectrum is mainly in the lower range where small noises are less annoying for human ear and the inpainting part is more perceptible. Finally, we got better test results for audio dataset where a particluar instrument is accompanist by other instruments if we train the network only on this particular instrument neglecting the other instruments. 
+We study the ability of Wasserstein Generative Adversarial Network (WGAN) to generate missing audio content which is, in context, (statistically similar) to the sound and the neighboring borders. We deal with the challenge of audio inpainting long range gaps (500 ms) using WGAN models. We improved the quality of the inpainting part using a new proposed WGAN architecture that uses a short-range and a long-range neighboring borders compared to the classical WGAN model. The performance was compared with two different audio instruments (piano and guitar) and on virtuoso pianists together with a string orchestra. The objective difference grading (ODG) was used to evaluate the performance of both architectures. The proposed model outperforms the classical WGAN model and improves the reconstruction of high-frequency content. Further, we got better results for instruments where the frequency spectrum is mainly in the lower range where small noises are less annoying for human ear and the inpainting part is more perceptible. Finally, we could show that better test results for audio dataset were reached where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument neglecting the other instruments. 
 
 \end{abstract}
 \let\thefootnote\relax\footnote{Model: \url{https://github.com/nperraud/gan_audio_inpainting}}
 %------------------------
 %------------------------
 \section{Introduction}
-Corrupted audio files, lost information in audio transmission (e.g. voice-over-IP transmission), and audio signals locally contaminated by noise are highly important problems in various audio processing tasks like in music enhancement and restoration. Data loss or corruption in the range of seconds can have various causes like partially damaged physical media. Further, loss of the connection in audio transmission may lead to data loss beyond just a few hundred milliseconds. This has highly unpleasant consequences for a listener, and it is hardly feasible to reconstruct the lost content from local information only. Such gaps are often several to hundreds milliseconds long.
+Corrupted audio files, lost information in audio transmission (e.g. voice-over-IP transmission), and audio signals locally contaminated by noise are highly important problems in various audio processing tasks like in music enhancement and restoration. Data loss or corruption in the range of seconds can have various causes like partially damaged physical media. Further, loss of the connection in audio transmission may lead to data loss beyond just a few hundred milliseconds. This has highly unpleasant consequences for a listener, and it is hardly feasible to reconstruct the lost content from local information only.
 
 Larger gaps spanning for seconds could happen in various applications and cases, such as in music enhancement and restoration. Rather unrealistic assumption are often made during short-range inpaining that the signal is stationary \cite{perraudin2018}, which tends not to hold for longer gaps. Long audio inpainting ($>200$ ms) for editing is a very challenging task as long gaps are commonly at the scale of seconds, rendering the algorithms for shorter gaps in vain. Further, the audio features are high dimensional, complex and non-correlated and thus directly applying state-of-the art models in image or video inpaintings tends not to work well \cite{chang2019}.
 
 Despite impressive recent advances with neural networks \cite{van2016wavenet, donahue2018wavegan}, audio recovering remain an important challenge in machine learning. Restoring of lost information in audio has been referred to as waveform substitution \cite{goodman1986}, audio inter/extrapolation \cite{kauppinen2001, etter1996}, or audio inpainting \cite{adler2012}. Reconstruction is usually aimed at providing a coherent and meaningful information while preventing audible artifacts so that the listener remains unaware of any occurred problem. When missing parts have a length no longer than 50ms, sparsity-based techniques can be successful \cite{adler2012, siedenburg2013}. Otherwise, techniques relying on auto-regressive modeling \cite{etter1996}, sinusoidal modeling \cite{lagrange2005, lukin2008} or based on self-content \cite{bahat2015} have been proposed. For greater length, it is useless to try recovering the exact waveform. Fortunately, Generative Adversarial Networks (GANs, \cite{goodfellow2014}) are able to produce signals statistically similar without the need to minimize an L2 loss. Hence they are a very good candidate for the audio inpainting with large gaps problem.
 
-GANs rely on two competing neural networks trained simultaneously in a two-player min-max game: The generator produces new data from samples of a random variable; The discriminator attempts to distinguish between these generated and real data. During the training, the generator's objective is to fool the discriminator, while the discriminator attempts to learn to better classify real and generated (fake) data. The potential advantages of GAN-based approaches is the rapid and straightforward sampling of large amounts of audio. Several GAN approaches have been investigate to fill gaps in audio like WaveGAN \cite{donahue2018wavegan}, TiFGAN \cite{marafioti2019adversarial} or wavenet \cite{van2016wavenet}
+GANs rely on two competing neural networks trained simultaneously in a two-player min-max game: The generator produces new data from samples of a random variable; The discriminator attempts to distinguish between these generated and real data. During the training, the generator's objective is to fool the discriminator, while the discriminator attempts to learn to better classify real and generated (fake) data. The potential advantages of GAN-based approaches is the rapid and straightforward sampling of large amounts of audio. Several GAN approaches have been investigate to fill gaps in audio like WaveGAN \cite{donahue2018wavegan} or TiFGAN \cite{marafioti2019adversarial}. Wavenet \cite{van2016wavenet} is another approach by directly modelling waveforms using a neural network method trained with recordings of real sound.
 
 In the reconstruction of audio signals the type of instrument plays an additional role. The special acoustic impression that a musical instrument makes on us is called the timbre of the instrument. The timbre of an instrument is mainly determined by the additional vibrations in addition to the basic vibrations. The fundamental vibration is the vibration of a string with the greatest amplitude. It determines the pitch. The additional vibrations that are added, which are also called harmonics or overtones, overlap with the fundamental vibration. This superposition of fundamental and harmonics results in a very characteristic vibration pattern for each instrument. We perceive these different vibration patterns as different timbres, also called sound patterns, at one and the same pitch. The number and intensity of the harmonics varies greatly from instrument to instrument. Because of these different harmonics, even instruments of the same type can have different timbres. Having multiple different instrument in the training set, a higher frequency spectrum has to be covered and the generated audio signal is stronger influenced by noise.
 
@@ -90,7 +94,7 @@ GANs learn mapping from low-dimensional latent vectors $\textit{\textbf{z}}\in Z
     \label{eq:valfct}
 \end{equation}
 
-$D$ is trained to determine if an example is real or fake, and $G$ is trained to fool the discriminator into thinking its output is real. Equation \ref{eq:valfct} equates to minimizing the Jensen-Shannon divergence between $P_X$, the data distribution, and $P_G$, the implicit distribution of the generator when $\textit{\textbf{z}}\sim P_Z$. The Jensen-Shannon divergence measure the similarity between two probability distribution, bounded by $\left[0,1\right]$, and is symmetric:
+$D$ is trained to determine if an example is real or fake, and $G$ is trained to fool the discriminator into thinking its output is real. Equation \ref{eq:valfct} equates to minimizing the Jensen-Shannon lower bound between $P_X$, the data distribution, and $P_G$, the implicit distribution of the generator when $\textit{\textbf{z}}\sim P_Z$. The Jensen-Shannon divergence measure the similarity between two probability distribution, bounded by $\left[0,1\right]$, and is symmetric:
 
 \begin{equation}
     D_{JS}(P_X\| P_Z) = \frac{1}{2}D_{KL}\left(P_X\| \frac{P_X+P_Z}{2}\right) +\frac{1}{2}D_{KL}\left(P_Z\| \frac{P_X+P_Z}{2}\right)
@@ -102,13 +106,13 @@ where $D_{KL}(P_X\| P_Z)$ is the Kullback-Leibler divergence measuring how the p
     D_{KL}(P_X\| P_Z)=\int_x P_X(x)\log \frac{P_X(x)}{P_Z(x)}dx
 \end{equation}
 
-In this formulation, GAN are notoriously difficult to train, and prone to catastrophic failure cases.
+In this formulation, GAN are notoriously difficult to train, and prone to catastrophic failure cases, with mode collapse and oscillations a common problem. Instead of producing samples sufficiently representing the true data distribution, the generator maps the entire latent space to a limited subset of the real data space. The generator does not 'converge' to a stationary distribution and \textit{mode collapse} occurs \cite{che2017, srivastava2017}. Further, GANs have \textit{catastrophic forgetting} tendency, which leads to the discriminator losing the ability to remember synthesized samples from previous instantiations of the generator \cite{liang2018}.
 
 %------------------------
 \subsection{Wasserstein Generative Adversarial Network (WGAN)}
 It is an extension of the GAN that seeks an alternate way of training the generator model to better approximate the distribution of data observed in a given training dataset.
 
-Instead of using a discriminator to classify or predict the probability of generated images as being real or fake, the WGAN changes or replaces the discriminator model with a critic that scores the realness or fakeness of a given sample.
+Instead of using a discriminator to classify or predict the probability of generated images as being real or fake, the WGAN changes or replaces the discriminator model with a critic that scores the realness or fakeness of a given sample. The critic, however, can’t saturate, and converges to a linear function that gives remarkably clean gradients everywhere. 
 
 This change is motivated by a theoretical argument that training the generator should seek a minimization of the distance between the distribution of the data observed in the training dataset and the distribution observed in generated examples.
 
@@ -124,7 +128,7 @@ where $\| f \| _L \leq 1 : \mathcal{X} \mapsto \mathbb{R}$ is the family of func
     V_\textrm{WGAN}(D_w,G) = \e_{\textit{\textbf{x}}\sim P_X}\left[D_w(\textit{\textbf{x}})\right] - \e_{\textit{\textbf{z}}\sim P_Z}\left[D_w(G(\textit{\textbf{z}}))\right]
 \end{equation}
 
-$D_w : \mathcal{X} \mapsto \mathbb{R}$ is not trained to identify examples as real or fake, but instead is trained as a function that assists in computing the Wasserstein distance (Figure \ref{fig:wgan}.
+$D_w : \mathcal{X} \mapsto \mathbb{R}$ is not trained to identify examples as real or fake, but instead is trained as a function that assists in computing the Wasserstein distance (Figure \ref{fig:wgan}).
 
 \begin{figure}[h]
     \includegraphics[scale=0.36]{images/model_basic2.jpg}
@@ -133,32 +137,33 @@ $D_w : \mathcal{X} \mapsto \mathbb{R}$ is not trained to identify examples as re
     \label{fig:wgan}
 \end{figure}
 
-The benefit of the WGAN is that the training process is more stable and less sensitive to model architecture and choice of hyperparameter configurations. Perhaps most importantly, the loss of the discriminator appears to relate to the quality of images created by the generator.
+The benefit of the WGAN is that the training process is more stable. Perhaps most importantly, the loss of the discriminator appears to relate to the quality of images created by the generator.
 
 %------------------------
 %------------------------
 \section{Dual Discriminator WGAN}
-To tackle the problem of long period audio inpainting we propose in this work applying a new model architecture which includes an approach for segmenting the raw audio waveform into borders neighboring the missing audio content.
+To tackle the problem of long period audio inpainting we propose in this work an approach for segmenting the raw audio waveform into borders neighboring the missing audio content and furthermore applying a new model architecture which includes the Wasserstein GAN but with an additional discriminator component applied. This new architecture is designed to accommodate the new borders segmentation. 
 
 \subsection{Long and Short Length Borders}
 
-% \begin{wrapfigure}{r}{0.37\textwidth}
-%     \includegraphics[scale=0.8]{images/borders.jpg}
-%     \centering
-%     \caption{Long and short neighbouring borders segmented from the real audio.}
-%     \label{fig:borders}
-% \end{wrapfigure}
-
-The approach applied here is the extraction of the short-range borders and the long-range borders of the missing audio content. The strategy behind this method is based on the idea that close neighbor audio have proven success to inpaint short period missing audio, however it fails for long periods. A larger range of neighboring audio can tell us something about the long missing audio content. By combine both overlapped borders we can involve more correlated information to the missing data and use it to train our model.
-
-\begin{figure}[h]
-    \includegraphics[scale=0.8]{images/borders.jpg}
+\begin{wrapfigure}{r}{0.37\textwidth}
+    \includegraphics[scale=0.7]{images/borders.jpg}
     \centering
     \caption{Long and short neighbouring borders segmented from the real audio.}
     \label{fig:borders}
-\end{figure}
+\end{wrapfigure}
+
+The approach applied here is the extraction of the short-range borders and the long-range borders of the missing audio content. The strategy behind this method is based on the idea that close neighbor audio have proven success to inpaint short period missing audio, however it fails for long periods. A larger range of neighboring audio can tell us something about the long missing audio content. By combine both overlapped borders we can involve more correlated information to the missing data and use it to train our model.
+
+% \begin{figure}[h]
+%     \includegraphics[scale=0.7]{images/borders.jpg}
+%     \centering
+%     \caption{Long and short neighbouring borders segmented from the real audio.}
+%     \label{fig:borders}
+% \end{figure}
 
 As shown in the Figure \ref{fig:borders}, the batch of real audio is split into segments around the missing content. The missing audio is set to around 500 ms (Depending on the sampling rate of the audio signal). Borders1 (Shorter borders) has a length of less than 1 s each side while Borders2 has a length of 2.5 s each side.
+
 
 \subsection{Model Architecture}
 One of the issues with GAN is the mode collapse which is formulated by the problem of the minimax optimization. Recent attempts have been made to solve the mode collapsing problem by improving the training \cite{Hoang2017MultiGenerator}. The idea of applying a dual discriminator GAN (D2GAN) as a method to tackle the mode collapse has been discussed in \cite{nguyen2017dual}.
@@ -175,7 +180,7 @@ We propose here a new approach motivated by \cite{nguyen2017dual} and based on t
 As shown in Figure \ref{fig:extendedmodel}, the generator inputs includes Borders 1 and 2 along with the normally distributed latent variable. The generator use a convolution operation for each input then concatenated all with the latent variable as an input to another convolution operation. Both discriminators are identical and includes components for convolution operations as well. The code of the generator and discriminator components are referenced from the Tensorflow implementation \cite{codegan} and has been adapted and integrated to the new model setup.
 
 \subsection{Loss Function}
-The network is trained on optimizing the Wasserstein loss. In this architecture we minimize the total loss of both discriminators. In addition, we minimize the generator loss which is the total of the negation of discriminators fake losses, see Figure \ref{fig:extendedmodel}. Figure \ref{fig:loss}, shows the performance of training the total D-loss and total G-loss for the PIANO and SOLO dataset. 
+The network is trained on optimizing the Wasserstein loss. In this architecture we minimize the total loss of both discriminators. In addition, we minimize the generator loss which is the total of the negation of discriminators fake losses, see Figure \ref{fig:extendedmodel}. Figure \ref{fig:loss}, shows the performance of training the total D-loss and total G-loss for the PIANO and SOLO dataset (more details about the dataset are given in section \ref{subsec:Dataset}) . 
 
 \begin{figure}[h!]
   \centering
@@ -205,7 +210,7 @@ The sampling rate was 16 kHz and audio segments with a duration of 6.5 s, corres
 
 
 %------------------
-\subsection{Dataset}
+\subsection{Dataset}\label{subsec:Dataset}
 We considered instrument sounds including piano, acoustic guitar and piano together with a string orchestra using three different dataset. The respective networks were trained on the targeted signal, with an gap size of 0.5 s. Reconstruction was evaluated on the trained signal class. The datasets were splitted into training, validation, and testing sets before segmenting them. The statistics of the resulting sets are presented in Table \ref{tab:maestro} for the following datasets:
 
 \begin{table}[ht]
@@ -215,13 +220,13 @@ We considered instrument sounds including piano, acoustic guitar and piano toget
          &      & Total & Training & Validation & Testing \\
         \hline
         PIANO   & Files     & 19 & 15 & 2 & 2 \\
-                & Duration  & 26.7 min & 3.3 min & 20.4 min & 3.0 min \\
+                & Duration  & 26.7 min & 20.4 min & 3.3 min & 3.0 min \\
         \hline
         SOLO    & Files     & 48 & 38 & 5 & 5 \\
                 & Duration  & 144 min & 114 min & 14.3 min & 15.7 min\\
         \hline
         MAESTRO & Files     & 1282 & 967 & 137 & 178 \\
-                & Duration  & 201.2 h & 20.5 h & 161.3 h & 19.4 h \\
+                & Duration  & 201.2 h & 161.3 h & 20.5 h & 19.4 h \\
         \hline
     \end{tabular}
     \caption{Dataset information}
@@ -238,6 +243,9 @@ We considered instrument sounds including piano, acoustic guitar and piano toget
 %------------------------
 \subsection{Evaluation metrics}
 Using the signal-to-noise ratios (SNRs) applied to the time-domain waveforms and magnitude spectrograms is not an appropriate indicator to evaluate the model because WGAN is not optimizing the L2-loss. Therefore, we conducted a user study evaluating the inpainting quality by means of objective difference grades (ODG \cite{recommendatioin2001}). It correspond to the subjective difference grade used in human-based audio test and is derived from the perceptual evaluation of audio quality (PEAQ, \cite{recommendatioin2001}). ODG range from 0 to -4 with the interpretation shown in Tab. \ref{tab:odg}.
+
+We generated 50 samples of 6.5 s length for each dataset and model, in total 150 samples per model, evaluate them by two independent person without knowing the source of the samples and evaluate using ODG.
+
 \begin{table}[ht]
     \centering
     \begin{tabular}{l|l}
@@ -272,7 +280,7 @@ Both existing and new implemented WGAN networks were trained for different instr
 From several experiments it has been noticed that the number of training iterations have direct impact on improving the quality of generated fake audio. Figure \ref{fig:realfakeimages}, shows two examples of the improvement of similarity between real and D2WGAN fake audio images along the training iterations.Therefore, it is essential to reduce training time and hence gain more iterations. With the D2WGAN setup the excepted training time required would be much higher than the classic WGAN, given that we use two discriminators and two set of borders for the generator. Therefore, to reduce training time the longer borders (Borders 2) and the corresponding longer real (Real 2) are downsampled by 4, before entering the generator and discriminator. Refer to figure \ref{fig:extendedmodel}.
 
 \begin{figure}[h]
-    \includegraphics[width=0.7\textwidth]{images/extend/extend_realfake_image.jpg}
+    \includegraphics[width=0.6\textwidth]{images/extend/extend_realfake_image.jpg}
     \centering
     \caption{A comparison of samples between the real signal images (left) and the D2WGAN fake images (right)}
     \label{fig:realfakeimages}
@@ -281,7 +289,7 @@ From several experiments it has been noticed that the number of training iterati
 %------------------------
 %------------------------
 \section{Results and discussion}
-We generated 50 samples of 6.5 s length for each dataset and model, in total 150 samples per model, evaluate them by giving each other a folder of samples to evaluate using ODG without knowing the source of samples.
+We analysed the performance of the WGAN and the D2WGAN architecture using all dataset. Further, a comparison between the datasets was performed and the effect of training steps and datasets on the D2WGAN model was analysed.
 
 %------------------------
 \subsection{Effect of the network type}
@@ -369,7 +377,7 @@ Figure \ref{fig:spectrogram} shows the magnitude spectrogram, visualizing the ch
 
 
 %------------------------
-\subsection{Effect of training steps and datasets on the D2WGAN model}
+\subsection{Effect of training steps and datasets on the D2WGAN model}\label{subsec:Effect of steps}
 We investigated the effect on what happens if we train the model on one dataset but tested it on another one. Further, we improved our ODG performance by training our network longer. Table \ref{tab:odgs_spec} shows the counted ODGs and the corresponding mean and standard deviation using the D2WGAN model. The D2WGAN model was trained on the PIANO dataset for 140000 steps and tested both on the PIANO and MAESTRO dataset. The D2WGAN model showed on both dataset a huge improvement of the ODGs. The results indicate that we didn't overfit the D2WGAN model and we got excellent performance.
 
 \begin{table}[ht]
@@ -380,16 +388,16 @@ We investigated the effect on what happens if we train the model on one dataset 
          & PIANO & MAESTRO \\
         \hline
         ODG: \ 0   & 0 & 3 \\
-        ODG: -1    & 21 & 35 \\
-        ODG: -2    & 7 & 12 \\
-        ODG: -3    & 0 & 0 \\
+        ODG: -1    & 27 & 35 \\
+        ODG: -2    & 22 & 12 \\
+        ODG: -3    & 1 & 0 \\
         ODG: -4    & 0 & 0 \\
         \hline
-        Mean ODG    & -1.25 & -1.18 \\
-        Std ODG     & 0.44 & 0.52 \\
+        Mean ODG    & -1.48 & -1.18 \\
+        Std ODG     & 0.54 & 0.52 \\
         \hline
-        Overall mean ODG & \multicolumn{2}{c}{1.22} \\
-        Overall Std ODG & \multicolumn{2}{c}{0.48}  \\
+        Overall mean ODG & \multicolumn{2}{c}{1.33} \\
+        Overall Std ODG & \multicolumn{2}{c}{0.53}  \\
         \hline
     \end{tabular}
     \caption{The counted ODGs and the corresponding mean and standard deviation (Std) of reconstructions of 0.5s gaps for the D2WGAN model trained on the PIANO dataset and tested with PIANO and MAESTRO dataset.}
@@ -402,7 +410,7 @@ Interestingly, the trained D2WGAN model slightly outperformed on the MAESTRO dat
 %------------------------
 %------------------------
 \section{Conclusion and outlook}
-In this capstone project we analysed long gap (500 - 550 ms) audio content inpainting using two kind of GANs: the classical Wasserstein GAN (WGAN) and the Dual Discriminator WGAN (D2WGAN) models. The D2WGAN model is a new proposed architecture improvement to inpaint the missing audio content using a short-range and a long-range borders. Both models were trained with different type of audio instruments (piano and guitar) and virtuoso pianists together with a string orchestra to investigate the possibility of finding an optimal model that is generalized rather than overfitting to specific dataset. The testing was evaluated by human judgement using the objective difference grading (ODG).
+In this project we analysed long gap (500 - 550 ms) audio content inpainting using two kind of GANs: the classical Wasserstein GAN (WGAN) and the Dual Discriminator WGAN (D2WGAN) models. The D2WGAN model is a new proposed architecture improvement to inpaint the missing audio content using a short-range and a long-range borders. Both models were trained with different type of audio instruments (piano and guitar) and virtuoso pianists together with a string orchestra to investigate the possibility of finding an optimal model that is generalized rather than overfitting to specific dataset. The testing was evaluated by human judgement using the objective difference grading (ODG).
 
 The new proposed D2WGAN model slightly outperforms the classic WGAN model for all three different dataset. We observed an improvement in the reconstruction of high-frequency content leading to better ODG scores. Especially, a better improvement was observed for the guitar and virtuoso pianists plays together with a string orchestra dataset. 
 This can be associated with the fact that the long range borders combined with short range borders can potential provide information in correlation with the gap content. The idea of two discriminators take advantage of the extend border. 
@@ -410,21 +418,9 @@ Furthermore, the poor results for the PIANO can be illustrated by the fact that 
 
 Generally, better results can be expected for instruments where the frequency spectrum is in the lower range and the higher frequencies are less affected and for sound of more dynamic instruments. This is the case for guitar or string instruments. Therefore, small noise are less annoying for the human ear and the inpainting part is more perceptible.
 
-Interestingly, we also showed that better results can be expected for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments.
+We also showed that by increasing the training steps up to 140k, the D2WGAN has significantly improved performance without overfitting as shown in table \ref{tab:odgs_spec} by comparing the results of testing two different datasets, which also means there is still room for improvement. More interestingly, we showed that better results can be achieved for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments. For example, training on PIANO and testing on MAESTRO.
 
-In the future to improve the model and the training performance we suggest to do following:
-\begin{itemize}
-    \item Playing around with the boarder length to see whether providing more information to the model helps to improve the performance. Furthermore, by changing the long and small range borders do we see improvements?
-    \item So far we have fixed the generator and discriminator architectures. It would be useful to understand the impact of adding more layers to the convolution operation or changing filters sizes.
-    \item Examine further the loss function. Instead of adding the loss of both discriminators, we investigate the impact of factorizing the D-losses giving more weight for one discriminator on the other based on their contributions.
-    \item Explore Multimodal strategies where we combine waveform and spectrogram images.
-    \item Investigate the impact of the frequency range on the model performance. Do we get better results for audio sounds having lower frequency signals?
-    \item Investigate more on our observed result that better results are really expected for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments. How big is the impact of different kind of accompanying instruments?
-    \item Training on a wide range of music instruments. For example, the SOLO dataset includes other instruments besides guitar.
- 
-\end{itemize}
-
-
+In the future to improve the model and the training performance we suggest to do following: (1) Playing around with the boarder length to see whether providing more information to the model helps to improve the performance. Furthermore, by changing the long and small range borders do we see improvements? (2) So far we have fixed the generator and discriminator architectures. It would be useful to understand the impact of adding more layers to the convolution operation or changing filters sizes. (3) Examine further the loss function. Instead of adding the loss of both discriminators, we investigate the impact of factorizing the D-losses giving more weight for one discriminator on the other based on their contributions. (4) Explore Multimodal strategies where we combine waveform and spectrogram images. (5) Investigate the impact of the frequency range on the model performance. Do we get better results for audio sounds having lower frequency signals? (6) Investigate more on our observed result that better results are really expected for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments. How big is the impact of different kind of accompanying instruments? (7) Training on a wide range of music instruments. For example, the SOLO dataset includes other instruments besides guitar.
 
 \bibstyle{ieeetr}
 \bibliographystyle{ieeetr}
