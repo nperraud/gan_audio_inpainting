@@ -54,21 +54,10 @@ Please keep this repository as clean as possible and do not commit data nor note
 	python download_data_maestro.py
 	```
 
-2. The training and the GAN system for the 'maestro' dataset is defined here:
-
-	```
-	experiments/myexperiments-maestro.py
-	```
-	
-   and the generator to load the 'maestro' dataset is defined here:
+2. The generator to load the 'maestro' dataset is defined here:
    
    	```
-	audioinpainting/load_generator_maestro.py
-	```
-3. Run training
-
-   	```
-	sbatch experiments/train-maestro.sh
+	audioinpainting/load_generator.py
 	```
 
 
