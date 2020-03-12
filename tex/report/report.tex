@@ -27,10 +27,6 @@ ebnerp@student.ethz.ch
 Amr Eltelt\\
 ETH Zurich\\
 aeltelt@student.ethz.ch
-\And
-Nathanaël Perraudin\\
-Swiss Data Science Center ETH\\
-nathanael.perraudin@gmail.com
 }
 
 
@@ -421,6 +417,9 @@ Generally, better results can be expected for instruments where the frequency sp
 We also showed that by increasing the training steps up to 140k, the D2WGAN has significantly improved performance without overfitting as shown in table \ref{tab:odgs_spec} by comparing the results of testing two different datasets, which also means there is still room for improvement. More interestingly, we showed that better results can be achieved for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments. For example, training on PIANO and testing on MAESTRO.
 
 In the future to improve the model and the training performance we suggest to do following: (1) Playing around with the boarder length to see whether providing more information to the model helps to improve the performance. Furthermore, by changing the long and small range borders do we see improvements? (2) So far we have fixed the generator and discriminator architectures. It would be useful to understand the impact of adding more layers to the convolution operation or changing filters sizes. (3) Examine further the loss function. Instead of adding the loss of both discriminators, we investigate the impact of factorizing the D-losses giving more weight for one discriminator on the other based on their contributions. (4) Explore Multimodal strategies where we combine waveform and spectrogram images. (5) Investigate the impact of the frequency range on the model performance. Do we get better results for audio sounds having lower frequency signals? (6) Investigate more on our observed result that better results are really expected for audio dataset where a particular instrument is accompanist by other instruments if we train the network only on this particular instrument and neglecting the other instruments. How big is the impact of different kind of accompanying instruments? (7) Training on a wide range of music instruments. For example, the SOLO dataset includes other instruments besides guitar.
+
+\section*{Acknowledgement}
+This work is done in collaboration with the Swiss Data Science Center (SDSC) in Zurich, Switzerland. The authors would like to thank SDSC for their support and in particularly Nathanaël Perraudin for his constructive and insightful inputs and for helping to manage the project.
 
 \bibstyle{ieeetr}
 \bibliographystyle{ieeetr}
