@@ -12,7 +12,7 @@ Please keep this repository as clean as possible and do not commit data nor note
 	cd code
 	```
 
-2. Initializae submodules
+2. Initialize submodules
 
 	```
 	git submodule update --init --recursive
