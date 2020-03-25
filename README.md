@@ -1,6 +1,6 @@
 # Audio inpainting with generative adversarial network
 
-This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. In this project the basic Wasserstein Generative Adversarial Network (WGAN) is compared with a new proposed WGAN architecture using a short-range and a long range neighboring borders to improve the inpainting part. The focus are on gaps in the range of 500ms using three different dataset: PIANO, SOLO and MAESTRO. Detailed information about the project and the dataset can be found in `tex/report/report.pdf`
+This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. In this project the basic Wasserstein Generative Adversarial Network (WGAN) is compared with a new proposed WGAN architecture using a short-range and a long range neighboring borders to improve the inpainting part. The focus are on gaps in the range of 500ms using three different dataset: PIANO, SOLO and MAESTRO. Detailed information about the project and the dataset can be found in `tex/report/report.pdf` or <https://arxiv.org/abs/2003.07704>
 
 Please keep this repository as clean as possible and do not commit data nor notebook with excecuted cells.
 
@@ -26,26 +26,7 @@ Please keep this repository as clean as possible and do not commit data nor note
 
 	You may want to use the nogpu version of the packages (`requirements_nogpu.txt`) for you local computer.
 
-4. Download datasets (just made it work for one)
-	
-	```
-	python download_data.py
-	python make_piano_dataset.py
-	```
 
-5. Launch jupyter
-	
-	```
-	jupyter lab
-	```
-
-6. Check the folder notebooks. Do the work.
-
-7. Clean your notebook using the makefile from the `notebooks` folder. This will erease all your outputs of all your notebook. If you do not want this, clean your notebook manually.
-	```
-	cd notebooks
-	make clean
-	```
 
 ## Download and train 'PIANO' dataset
 1. Go to folder
