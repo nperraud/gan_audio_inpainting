@@ -25,8 +25,7 @@ downscale = 2
 # Load the data
 
 start = time.time()
-# dataset = data.load.load_audio_dataset(scaling=downscale)
-dataset = Dataset_maestro(scaling=downscale, spix=1024*52, augmentation=True, maxsize=2, type='maestro', path='/scratch/snx3000/pebner/data', fs_rate=48000, files=8, preprocessing=False)
+dataset = Dataset_maestro(scaling=downscale, spix=1024*52, augmentation=True, maxsize=2, type='maestro', path='../data', fs_rate=48000, files=8, preprocessing=False)
 
 print('Number of samples: {}'.format(dataset.N))
 
@@ -34,7 +33,7 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 time_str = 'extend_maestro'
-global_path = '/scratch/snx3000/pebner/saved_results'
+global_path = '/saved_results'
 
 name = 'WGAN' + '_' + time_str
 
