@@ -27,7 +27,7 @@ downscale = 2
 
 start = time.time()
 # dataset = data.load.load_audio_dataset(scaling=downscale)
-dataset = Dataset_maestro(scaling=downscale, spix=1024*16, augmentation=True, maxsize=2, type='maestro', path='/scratch/snx3000/pebner/data', fs_rate=48000, files=8, preprocessing=False)
+dataset = Dataset_maestro(scaling=downscale, spix=1024*16, augmentation=True, maxsize=2, type='maestro', path='../data', fs_rate=48000, files=8, preprocessing=False)
 print('Number of samples: {}'.format(dataset.N))
 
 #%%
