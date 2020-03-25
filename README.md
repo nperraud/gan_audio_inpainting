@@ -52,26 +52,26 @@ Please keep this repository as clean as possible and do not commit data nor note
 	cd code/experiments
 	```
 	
-2.1 Training of the basic WGAN model using PIANO dataset
+2. Training of the basic WGAN model using PIANO dataset
 	```
 	python myexperiments-basic-piano.py
 	```
 
-2.2 Training of the extend WGAN model using PIANO dataset
+3. Training of the extend WGAN model using PIANO dataset
 	```
 	python myexperiments-extend-piano.py
 	```
 
-2.3 Training of the basic WGAN model using SOLO dataset
+4. Training of the basic WGAN model using SOLO dataset
 	```
 	python myexperiments-basic-solo.py
 	```
 
-2.4 Training of the extend WGAN model using PIANO dataset
+5. Training of the extend WGAN model using PIANO dataset
 	```
 	python myexperiments-extend-solo.py
 	```
-3. Testing the trained models
+6. Testing the trained models
 	```
 	python myexperiments-test-model.py
 	```
