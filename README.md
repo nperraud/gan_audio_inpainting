@@ -1,6 +1,6 @@
 # Audio inpainting with generative adversarial network
 
-This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. Information about the project can be found in `tex/project_infos/`
+This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. In this project the basic Wasserstein Generative Adversarial Network (WGAN) is compared with a new proposed WGAN architecture using a short-range and a long range neighboring borders to improve the inpainting part. The focus are on gaps in the range of 500ms using three different dataset: PIANO, SOLO and MAESTRO. Detailed information about the project and the dataset can be found in `tex/report/report.pdf`
 
 Please keep this repository as clean as possible and do not commit data nor notebook with excecuted cells.
 
@@ -46,6 +46,35 @@ Please keep this repository as clean as possible and do not commit data nor note
 	cd notebooks
 	make clean
 	```
+## Run basic and extended model on the PIANO and SOLO dataset
+1. Go to folder
+	```
+	cd code/experiments
+	```
+	
+2.1 Training of the basic WGAN model using PIANO dataset
+	```
+	python myexperiments-basic-piano.py
+	```
+
+2.2 Training of the extend WGAN model using PIANO dataset
+	```
+	python myexperiments-extend-piano.py
+	```
+
+2.3 Training of the basic WGAN model using SOLO dataset
+	```
+	python myexperiments-basic-solo.py
+	```
+
+2.4 Training of the extend WGAN model using PIANO dataset
+	```
+	python myexperiments-extend-solo.py
+	```
+3. Testing the trained models
+	```
+	python myexperiments-test-model.py
+	```
 
 ## Download and train 'maestro' dataset
 1. Download 'maestro' dataset (<https://magenta.tensorflow.org/datasets/maestro>)
@@ -63,7 +92,6 @@ Please keep this repository as clean as possible and do not commit data nor note
 
 ## Project general informations
 
-* Meeting time: Thursday 2pm
 * Students: Ebner Pirmin, Amr Eltelt
 * Supervisor: Nathanaël Perraudin
 
