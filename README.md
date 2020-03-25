@@ -46,49 +46,82 @@ Please keep this repository as clean as possible and do not commit data nor note
 	cd notebooks
 	make clean
 	```
-## Run basic and extended model on the PIANO and SOLO dataset
+
+## Download and train 'PIANO' dataset
+1. Go to folder
+	```
+	cd code
+	```
+	
+2. Download and make 'PIANO' dataset (<http://deepyeti.ucsd.edu/cdonahue/wavegan/data/mancini_piano.tar.gz>)
+
+	```
+	python download_data.py
+	python make_piano_dataset.py
+	```
+3. Go to folder
+   
+   	```
+	cd code/experiments
+	```
+4. Training basic and extend WGAN model
+   
+   	```
+	python myexperiments-basic-piano.py
+	python myexperiments-extend-piano.py
+	```
+
+## Download and train 'SOLO' dataset
+1. Go to folder
+	```
+	cd code
+	```
+	
+2. Download 'SOLO' dataset (<https://www.kaggle.com/zhousl16/solo-audio>)
+3. Make the 'SOLO' dataset
+	```
+	python make_solo_dataset.py
+	```
+4. Go to folder
+   
+   	```
+	cd code/experiments
+	```
+5. Training basic and extend WGAN model
+   
+   	```
+	python myexperiments-basic-solo.py
+	python myexperiments-extend-solo.py
+	```
+
+## Download and train 'MAESTRO' dataset
+1. Go to folder
+	```
+	cd code
+	```
+	
+2. Download 'MAESTRO' dataset (<https://magenta.tensorflow.org/datasets/maestro>)
+	```
+	python download_data_maestro.py
+	```
+3. Go to folder 
+   	```
+	cd code/experiments
+	```
+4. Training basic and extend WGAN model
+   	```
+	python myexperiments-basic-maestro.py
+	python myexperiments-extend-maestro.py
+	```
+## Testing the trained models
 1. Go to folder
 	```
 	cd code/experiments
 	```
-	
-2. Training of the basic WGAN model using PIANO dataset
-	```
-	python myexperiments-basic-piano.py
-	```
-
-3. Training of the extend WGAN model using PIANO dataset
-	```
-	python myexperiments-extend-piano.py
-	```
-
-4. Training of the basic WGAN model using SOLO dataset
-	```
-	python myexperiments-basic-solo.py
-	```
-
-5. Training of the extend WGAN model using PIANO dataset
-	```
-	python myexperiments-extend-solo.py
-	```
-6. Testing the trained models
+2. Run test script (make sure that the path to the trained model is correct)
 	```
 	python myexperiments-test-model.py
 	```
-
-## Download and train 'maestro' dataset
-1. Download 'maestro' dataset (<https://magenta.tensorflow.org/datasets/maestro>)
-
-	```
-	python download_data_maestro.py
-	```
-
-2. The generator to load the 'maestro' dataset is defined here:
-   
-   	```
-	audioinpainting/load_generator.py
-	```
-
 
 ## Project general informations
 
