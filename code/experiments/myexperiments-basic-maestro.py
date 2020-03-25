@@ -33,7 +33,7 @@ print('Number of samples: {}'.format(dataset.N))
 #%%
 # # Define parameters for the WGAN
 time_str = 'basic_maestro'
-global_path = '/scratch/snx3000/pebner/saved_results_basic'
+global_path = '/saved_results_basic'
 
 name = 'WGAN' + '_' + time_str
 
