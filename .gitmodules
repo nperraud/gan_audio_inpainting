@@ -1,3 +1,3 @@
 [submodule "code/gantools"]
 	path = code/gantools
-	url = git@github.com:nperraud/gantools.git
+	url = https://github.com/nperraud/gantools.git
