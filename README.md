@@ -1,6 +1,6 @@
 # Audio inpainting with generative adversarial network
 
-This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. In this project the basic Wasserstein Generative Adversarial Network (WGAN) is compared with a new proposed WGAN architecture using a short-range and a long range neighboring borders to improve the inpainting part. The focus are on gaps in the range of 500ms using three different dataset: PIANO, SOLO and MAESTRO. Detailed information about the project and the dataset can be found in `tex/report/report.pdf` or <https://arxiv.org/abs/2003.07704>
+This is the repository for the DAS project `Audio inpainting with Generative Adversarial Networks`. In this project the basic Wasserstein Generative Adversarial Network (WGAN) is compared with a new proposed WGAN architecture using a short-range and a long range neighboring borders to improve the inpainting part. The focus are on gaps in the range of 500ms using three different dataset: PIANO, SOLO and MAESTRO. Detailed information about the project and the dataset can be found in `tex/report/report.pdf` or <https://arxiv.org/abs/2003.07704>. We demonstrate a few samples here <https://blogs.ethz.ch/web-audio-inpainting-gan/>
 
 Please keep this repository as clean as possible and do not commit data nor notebook with excecuted cells.
 
